@@ -1,0 +1,452 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Yeseva+One&display=swap');
+@import url(./aboutSection.css);
+@import url(./catalog.css);
+@import url('https://fonts.googleapis.com/css2?family=Danfo&family=PT+Sans+Narrow:wght@400;700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=PT+Sans+Narrow:wght@400;700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+body {
+  background-color: #F9F9F9 !important;
+}
+
+/* !ШАПКА */
+
+header{
+  background-color: #F9F9F9;
+}
+
+.btn-header{
+  background-color: black;
+}
+
+.brand {
+    font-family: "Yeseva One", serif;
+    font-size: 24px;
+    letter-spacing: 1px;
+    color: #02111B;
+    margin-right: 40px;
+}
+
+.nav-divider {
+    width: 1px;
+    height: 24px;
+    background: #dee2e6;
+    margin: 0 20px;
+}
+
+.search-box {
+    width: 368px;
+    border-radius: 51px;
+    background: #fff;
+    /* Убраны margin-left: auto и margin-right */
+}
+
+/* Добавлены общие отступы */
+.btn-header, .search-box, .nav-divider {
+    margin-right: 2rem !important; /* 32px при стандартном rem */
+}
+
+.d-flex.gap-4 {
+    gap: 1.5rem !important; /* 24px */
+}
+
+.top-bar {
+    max-width: 1400px;
+    margin: 0 auto; /* Добавлено для центрирования */
+    background: #000;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    border-radius: 0 0 200px 200px;
+    box-shadow: 0 3px 14.4px 5px rgba(0,0,0,0.25);
+    position: relative; /* Для корректного отображения тени */
+    z-index: 1000; /* Чтобы тень была поверх других элементов */
+}
+
+.cart-badge {
+    position: relative;
+    top: -12px;
+    right: -8px;
+}
+
+/* Добавляем новый медиа-запрос */
+@media (max-width: 1199.98px) {
+    .top-bar {
+        max-width: 100%;
+        border-radius: 0 0 100px 100px;
+        padding: 0 20px;
+    }
+
+    .brand {
+        margin-right: 30px;
+        font-size: 22px;
+    }
+
+    .search-box {
+        width: 300px;
+        margin-right: 1.5rem !important;
+    }
+
+    .btn-header {
+        padding: 8px 16px;
+    }
+
+    .nav-divider {
+        margin: 0 15px;
+    }
+
+    .d-flex.gap-4 {
+        gap: 1rem !important;
+    }
+}
+
+/* Остальные существующие медиа-запросы остаются без изменений */
+
+/* Добавляем новый медиа-запрос */
+@media (max-width: 1199.98px) {
+    .top-bar {
+        max-width: 100%;
+        border-radius: 0 0 100px 100px;
+        padding: 0 20px;
+    }
+
+    .brand {
+        margin-right: 30px;
+        font-size: 22px;
+    }
+
+    .search-box {
+        width: 300px;
+        margin-right: 1.5rem !important;
+    }
+
+    .btn-header {
+        padding: 8px 16px;
+    }
+
+    .nav-divider {
+        margin: 0 15px;
+    }
+
+    .d-flex.gap-4 {
+        gap: 1rem !important;
+    }
+}
+
+/* Остальные существующие медиа-запросы остаются без изменений */
+
+@media (max-width: 991.98px) {
+    .top-bar {
+        border-radius: 0 0 60px 60px;
+        height: 40px;
+    }
+
+    .brand {
+        margin-right: 20px;
+        font-size: 20px;
+    }
+
+    .navbar-collapse {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        padding: 1rem;
+        z-index: 1000;
+    }
+
+    .nav-divider {
+        display: none;
+    }
+
+    .search-box {
+        width: 100%;
+        max-width: 100%;
+        order: -1;
+        margin-bottom: 1rem;
+    }
+
+    .d-flex.gap-4 {
+        flex-wrap: wrap;
+        gap: 1rem !important;
+        justify-content: space-between;
+    }
+
+    .btn-header {
+        margin: 0;
+        flex: 1;
+        text-align: center;
+        min-width: 120px;
+    }
+
+    .navbar-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .top-bar {
+        border-radius: 0 0 40px 40px;
+        height: 36px;
+    }
+
+    .brand {
+        font-size: 18px;
+        margin-right: 15px;
+    }
+
+    .btn-header {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+
+    .cart-badge {
+        top: -8px;
+        right: -4px;
+        font-size: 10px;
+        padding: 2px 5px;
+    }
+
+    .navbar-toggler {
+        padding: 4px 8px;
+        font-size: 14px;
+    }
+}
+
+/* !БАНЕР */
+
+.product-title {
+    font-family: "Roboto", sans-serif;
+    font-weight: 100;
+    font-size: 42px;
+    color: black;
+  }
+
+  .image-column {
+    display: flex;
+    justify-content: flex-end; /* Выравнивание по правому краю */
+    align-items: center;
+    height: 100%;
+  }
+  
+  .product-image {
+    max-height: 700px; /* Подстройте под ваш размер */
+    width: auto;
+    position: relative;
+    z-index: 2; /* Поднимаем выше фоновых кругов */
+  }
+
+  .btn-banner {
+    display: inline-flex;       /* Используем flex для точного контроля */
+    align-items: center;        /* Вертикальное выравнивание */
+    justify-content: center;    /* Горизонтальное выравнивание */
+    background-color: black;
+    border-radius: 5%;
+    height: 29px;               /* Замена max-height на фиксированную высоту */
+    min-width: 120px;           /* Минимальная ширина для правильного отображения */
+    padding: 0 15px;            /* Отступы слева/справа */
+    font-family: "Roboto", sans-serif;
+    font-size: 16px;
+    text-decoration: none;      /* Убираем подчеркивание, если это ссылка */
+    cursor: pointer;
+}
+  .image-wrapper {
+    position: relative;
+    right: -50px; /* Сдвигает изображение за границу контейнера */
+    margin-left: auto;
+  }
+
+.product-features {
+  font-family: "Roboto", sans-serif;
+  font-weight: 700;
+  font-size: 32px;
+  color: black;
+}
+
+.product-description {
+  font-family: "Roboto", sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: black;
+}
+
+  .apple-logo {
+    padding-top: 34%;
+  }
+
+  .hero-section {
+        background: #f9f9f9;
+        min-height: 100vh;
+    }
+
+    .circle-bg {
+        border-radius: 50%;
+        opacity: 0.2;
+        filter: blur(50px);
+        position: relative;
+        z-index: 0;
+    }
+
+    .circle-1 {
+        width: 600px;
+        height: 600px;
+        background: linear-gradient(135deg, #FFC0CB, #F08080);
+        margin: -200px -300px;
+    }
+
+    .circle-2 {
+        width: 400px;
+        height: 400px;
+        background: linear-gradient(45deg, #FFB6C1, #FFA07A);
+        margin: -150px -200px;
+    }
+
+    .content-container {
+        padding: 100px 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .title-row {
+        margin-bottom: 2rem;
+    }
+
+    .flame-icon {
+        width: 24px;
+        margin-right: 0.5rem;
+    }
+
+    .section-title {
+        font-family: "Roboto-Thin", sans-serif;
+        font-size: 2.625rem;
+        font-weight: 100;
+        color: #000;
+    }
+
+    .feature-text {
+        font-family: "Roboto-Bold", sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        line-height: 1.4;
+        margin-bottom: 1.5rem;
+    }
+
+    .model-description {
+        font-family: "Roboto-Regular", sans-serif;
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+
+    .btn-custom {
+        background-color: #000;
+        border-radius: 0.25rem;
+        padding: 0.5rem 1.5rem;
+        font-family: "Roboto-Regular", sans-serif;
+        font-size: 1rem;
+        color: white;
+    }
+
+       /* !категории */
+
+       .categories-section {
+        background: #f9f9f9;
+        padding: 2rem 0;
+    }
+  
+    .section-title {
+        font-family: 'Roboto', sans-serif;
+        font-weight: 700;
+        font-size: 24px;
+        color: #02111b;
+        margin-bottom: 15px;
+    }
+  
+    .category-card {
+        border: none;
+        background: transparent;
+        transition: transform 0.3s ease;
+        height: 200px;
+    }
+  
+    .image-container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 3px 3px -1px rgba(0,0,0,0.1);
+        padding: 15px;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+  
+    .category-img {
+        max-width: 100%;
+        height: 170px;
+        object-fit: contain;
+    }
+  
+    .category-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+    }
+  
+    .category-item {
+        font-family: 'Roboto', sans-serif;
+        font-size: 16px;
+        color: #3d3d3d;
+        padding: 8px 0;
+    }
+  
+    @media (max-width: 992px) {
+        .section-title {
+            font-size: 20px;
+        }
+        
+        .category-item {
+            font-size: 14px;
+        }
+        
+        .category-img {
+            height: 140px;
+        }
+    }
+  
+    @media (max-width: 768px) {
+        .section-title {
+            text-align: center;
+            font-size: 18px;
+        }
+        
+        .category-card {
+            height: auto;
+            margin-bottom: 1.5rem;
+        }
+        
+        .image-container {
+            height: 150px;
+            margin-bottom: 15px;
+        }
+        
+        .category-img {
+            height: 120px;
+        }
+    }
+  
+    @media (max-width: 576px) {
+        .category-img {
+            height: 100px;
+        }
+        
+        .section-title {
+            font-size: 16px;
+        }
+    }
