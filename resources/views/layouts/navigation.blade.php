@@ -52,7 +52,7 @@
         <div class="collapse navbar-collapse flex-grow-1" id="navbarNav">
           <div class="d-flex flex-column flex-lg-row align-items-lg-center w-100">
             <!-- Кнопка каталога -->
-            <a href="{{ route('catalog') }}" class="btn btn-dark rounded-pill px-4 py-2 d-flex align-items-center btn-header me-lg-4 mb-3 mb-lg-0 {{ Request::is('catalog') ? 'active' : '' }}">
+            <a href="{{ route('catalog') }}" class="btn btn-black rounded-pill px-4 py-2 d-flex align-items-center btn-header me-lg-4 mb-3 mb-lg-0 {{ Request::is('catalog') ? 'active' : '' }}">
               Каталог
               <i class="bi bi-chevron-down ms-2"></i>
             </a>

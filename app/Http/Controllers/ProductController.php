@@ -107,4 +107,9 @@ ProductController extends Controller
         return redirect()->route('admin.products');
     }
 
+    public function show(Product $product)
+    {
+        $product->load('category');
+        return view('product', compact('product'));
+    }
 }

@@ -170,7 +170,145 @@
     </div>
 </section>
 
-<div class="container">
+<section class="brands-section py-5">
+  <div class="container">
+    <div class="row g-3 justify-content-center">
+      <!-- Логотип 1 -->
+      <div class="col-6 col-md-4 col-lg-2">
+        <div class="brand-card">
+          <img src="{{ Vite::asset('resources/media/images/logo_brand (1).png') }}" alt="Brand 1" class="brand-logo">
+        </div>
+      </div>
+
+      <!-- Логотип 2 -->
+      <div class="col-6 col-md-4 col-lg-2">
+        <div class="brand-card">
+          <img src="{{ Vite::asset('resources/media/images/logo_brand (2).png') }}" alt="Brand 2" class="brand-logo">
+        </div>
+      </div>
+
+      <!-- Логотип 3 -->
+      <div class="col-6 col-md-4 col-lg-2">
+        <div class="brand-card">
+          <img src="{{ Vite::asset('resources/media/images/logo_brand (3).png') }}" alt="Brand 3" class="brand-logo">
+        </div>
+      </div>
+
+      <!-- Логотип 4 -->
+      <div class="col-6 col-md-4 col-lg-2">
+        <div class="brand-card">
+          <img src="{{ Vite::asset('resources/media/images/logo_brand (4).png') }}" alt="Brand 4" class="brand-logo">
+        </div>
+      </div>
+
+      <!-- Логотип 5 -->
+      <div class="col-6 col-md-4 col-lg-2">
+        <div class="brand-card">
+          <img src="{{ Vite::asset('resources/media/images/logo_brand (5).png') }}" alt="Brand 5" class="brand-logo">
+        </div>
+      </div>
+
+      <!-- Логотип 6 -->
+      <div class="col-6 col-md-4 col-lg-2">
+        <div class="brand-card">
+          <img src="{{ Vite::asset('resources/media/images/logo_brand (6).png') }}" alt="Brand 6" class="brand-logo">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="products-section">
+  <div class="container">
+      <div class="row g-4">
+          @if(isset($products) && $products->isNotEmpty())
+              @foreach($products as $product)
+              <div class="col-xl-4 col-md-6">
+                  <div class="product-card position-relative">
+                      <img src="{{ Vite::asset('resources/media/images/bxs_hot.png') }}" class="product-badge">
+                      <div class="row h-100 g-0">
+                          <div class="col-6">
+                              <div class="product-content">
+                                  <span class="product-timer">Еще 4 часа скидка</span>
+                                  <h3 class="product-title-cart">{{ $product->title }}</h3>
+                                  <a href="{{ route('product.show', $product->id) }}" class="btn btn-outline-primary product-detail-btn">Подробнее</a>
+                              </div>
+                          </div>
+                          <div class="col-6">
+                              <div class="product-image-container">
+                                  <img src="{{ Vite::asset('resources/media/images/' . $product->img) }}" 
+                                       class="product-image" 
+                                       alt="{{ $product->title }}">
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              @endforeach
+          @else
+              <div class="col-12">
+                  <p class="text-center">Нет доступных товаров</p>
+              </div>
+          @endif
+      </div>
+  </div>
+</section>
+
+<section class="top-categories-section">
+    <div class="container">
+        <div class="row align-items-center mb-4">
+            <div class="col-md-8">
+                <h2 class="top-categories-title">Популярные категории</h2>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{{ route('catalog') }}" class="top-categories-link">
+                    Перейти в каталог
+                    <i class="bi bi-chevron-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="top-categories-grid">
+            <div class="row g-4">
+                @if(isset($topCategoriesProducts) && $topCategoriesProducts->isNotEmpty())
+                    @foreach($topCategoriesProducts as $product)
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="top-categories-card">
+                            <div class="top-categories-badge">{{ $product->is_seasonal ? 'HOT' : '911' }}</div>
+                            <img src="{{ Vite::asset('resources/media/images/' . $product->img) }}" 
+                                 class="top-categories-image" 
+                                 alt="{{ $product->title }}">
+                            <h3 class="top-categories-product-title">{{ $product->title }}</h3>
+                            <div class="top-categories-rating">
+                                @for($i = 1; $i <= 5; $i++)
+                                    @if($i <= floor($product->rating ?? 0))
+                                        <i class="bi bi-star-fill"></i>
+                                    @elseif($i - 0.5 <= ($product->rating ?? 0))
+                                        <i class="bi bi-star-half"></i>
+                                    @else
+                                        <i class="bi bi-star"></i>
+                                    @endif
+                                @endfor
+                            </div>
+                            <div class="top-categories-price">{{ number_format($product->price, 0, ',', ' ') }} ₽</div>
+                            <a href="{{ route('product.show', $product->id) }}" class="top-categories-btn">
+                                Подробнее
+                                <i class="bi bi-arrow-right-short"></i>
+                            </a>
+                        </div>
+                    </div>
+                    @endforeach
+                @else
+                    <div class="col-12">
+                        <p class="text-center">Нет доступных товаров</p>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- <div class="container">
     <section class="about">
         <h3 class="about__title text-start">Dualshop – всё для технологий</h3>
         <p class="about__text-block">
@@ -214,9 +352,9 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> -->
 
-    <section class="slider">
+    <!-- <section class="slider">
         <h3 class="about__title text-start">Популярные товары</h3>
         @if(isset($products) && $products->isNotEmpty())
         <div id="carouselExampleCaptions" class="carousel carousel-dark slide">
@@ -249,9 +387,9 @@
         @else
         <p>Нет доступных продуктов для отображения.</p>
         @endif
-    </section>
+    </section> -->
 
-    <section class="new-products">
+    <!-- <section class="new-products">
         <div class="container">
             <h3 class="about__title text-start">Новинки</h3>
             <div class="new-products__grid">
@@ -283,7 +421,7 @@
                 @endif
             </div>
         </div>
-    </section>
+    </section> -->
 </div>
 
 @auth

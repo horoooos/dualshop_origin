@@ -1,9 +1,5 @@
 <x-guest-layout>
     <!-- Session Status -->
-    <!-- <div class="alert alert-success mb-4" role="alert">
-        <x-auth-session-status :status="session('status')" />
-    </div> -->
-
     <form method="POST" action="{{ route('login') }}" class="form-container">
         @csrf
 

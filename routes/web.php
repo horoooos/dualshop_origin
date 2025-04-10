@@ -24,6 +24,7 @@ use App\Http\Controllers\CategoriesController;
 
 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog');
 Route::get('/catalog/{category}', [CatalogController::class, 'category'])->name('catalog.category');
+Route::get('/product/{product}', [ProductController::class, 'show'])->name('product.show');
 
 Route::get('/about', function () {
     return view('about');

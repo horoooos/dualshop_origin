@@ -30,11 +30,25 @@ class HomeController extends Controller {
             ->orderByDesc('discount')
             ->limit(3)
             ->get();
+
+        // Товары для основной секции
+        $products = Product::with('category')
+            ->orderByDesc('created_at')
+            ->limit(6)
+            ->get();
+
+        // Топ категории товары
+        $topCategoriesProducts = Product::with('category')
+            ->orderByDesc('views')
+            ->limit(4)
+            ->get();
     
-        return view('home', compact(
+        return view('welcome', compact(
             'popularCategories',
             'seasonalProducts',
-            'discountedProducts'
+            'discountedProducts',
+            'products',
+            'topCategoriesProducts'
         ));
     }
 } 
