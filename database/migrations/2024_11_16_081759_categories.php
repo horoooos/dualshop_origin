@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('categories', function (Blueprint $table) {
             $table->increments('id');
             $table->string('product_type');
+            $table->boolean('is_seasonal')->default(false);
+            $table->timestamps();
         });
     }
 

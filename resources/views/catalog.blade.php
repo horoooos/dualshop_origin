@@ -1,15 +1,13 @@
 @extends('layouts.app')
 @section('content')
+
     <section class="catalog container pt-4">
         <div class="catalog_text">
             <h3 class="about__title text-start">Сортировать по</h3>
             <div class="catalog__sort">
-                <a href="{{ $params->has('filter') ? '?filter=' . $params['filter'] . '&' : '?' }}sort_by{{ $params->has('sort_by') == 'country' ? '_desc' : '' }}=country" class="catalog__sort-item
-                {{ (request()->query('sort_by') == 'country' ? 'active' : request()->query('sort_by_desc') == 'country') ? 'active' : '' }}">Страна поставщика</a>
-                <a href="{{ $params->has('filter') ? '?filter=' . $params['filter'] . '&' : '?' }}sort_by{{ $params->has('sort_by') == 'title' ? '_desc' : '' }}=title" class="catalog__sort-item
-                {{ (request()->query('sort_by') == 'title' ? 'active' : request()->query('sort_by_desc') == 'title') ? 'active' : '' }}">Название</a>
-                <a href="{{ $params->has('filter') ? '?filter=' . $params['filter'] . '&' : '?' }}sort_by{{ $params->has('sort_by') == 'price' ? '_desc' : '' }}=price" class="catalog__sort-item
-                {{ (request()->query('sort_by') == 'price' ? 'active' : request()->query('sort_by_desc') == 'price') ? 'active' : '' }}">Цена</a>
+                <a href="{{ $params->has('filter') ? '?filter=' . $params['filter'] . '&' : '?' }}sort_by{{ $params->has('sort_by') == 'country' ? '_desc' : '' }}=country" class="catalog__sort-item {{ (request()->query('sort_by') == 'country' ? 'active' : request()->query('sort_by_desc') == 'country') ? 'active' : '' }}">Страна поставщика</a>
+                <a href="{{ $params->has('filter') ? '?filter=' . $params['filter'] . '&' : '?' }}sort_by{{ $params->has('sort_by') == 'title' ? '_desc' : '' }}=title" class="catalog__sort-item {{ (request()->query('sort_by') == 'title' ? 'active' : request()->query('sort_by_desc') == 'title') ? 'active' : '' }}">Название</a>
+                <a href="{{ $params->has('filter') ? '?filter=' . $params['filter'] . '&' : '?' }}sort_by{{ $params->has('sort_by') == 'price' ? '_desc' : '' }}=price" class="catalog__sort-item {{ (request()->query('sort_by') == 'price' ? 'active' : request()->query('sort_by_desc') == 'price') ? 'active' : '' }}">Цена</a>
                 <a href="/catalog" class="catalog__sort-item--default">Сбросить</a>
             </div>
         </div>
@@ -21,24 +19,43 @@
         <div class="catalog__list">
             @if(count($products) > 0)
                 @foreach($products as $product)
-                    <div class="card catalog__item">
-                        <img src="{{ Vite::asset('resources/media/images/') . $product->img }}" alt="{{ $product->title }}" class="card-img-top">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ $product->title }}</h5>
-                            <p class="card-text">{{ $product->price }} руб.</p>
-                            <div class="new-product__actions">
-                                <a href="/product/{{ $product->id }}" class="btn btn-outline-success">Подробнее</a>
-                                @auth
-                                    <button onclick="addToCart({{ $product->id }})" class="btn btn-success">
-                                        <i class="fas fa-shopping-cart"></i>
-                                    </button>
-                                @endauth
+                    <div class="catalog__item">
+                        <div class="product-image-container">
+                            <img src="{{ Vite::asset('resources/media/images/' . $product->img) }}" alt="{{ $product->title }}" class="product-imagee">
+                        </div>
+                        
+                        <div class="product-info">
+                            <a href="/product/{{ $product->id }}" class="product-titlee">
+                                {{ $product->title }}
+                            </a>
+                            <div class="product__description">
+                                <h4>Описание:</h4>
+                                <p>{{ $product->description ?? 'Описание отсутствует' }}</p>
                             </div>
+                        </div>
+
+                        <div class="product-price-block">
+                            <div class="product-price">
+                                {{ number_format($product->price, 0, ',', ' ') }} ₽
+                            </div>
+                            <div class="product-credit">
+                                от {{ number_format($product->price / 12, 0, ',', ' ') }} ₽/мес
+                            </div>
+                            @auth
+                            <div class="product-actions">
+                                <button class="btn-buy">Купить</button>
+                                <button class="btn-favorite">
+                                    <i class="bi bi-heart"></i>
+                                </button>
+                            </div>
+                            @endauth
                         </div>
                     </div>
                 @endforeach
             @else
-                <h3>Ничего не найдено</h3>
+                <div class="col-12">
+                    <h3 class="text-center">Ничего не найдено</h3>
+                </div>
             @endif
         </div>
     </section>
@@ -47,7 +64,7 @@
     <div class="position-fixed" style="top: 20px; right: 20px; z-index: 9999;">
         <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header bg-success text-white">
-                <i class="fas fa-check-circle me-2"></i>
+                <i class="bi bi-check-circle me-2"></i>
                 <strong class="me-auto">Успешно</strong>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
@@ -58,7 +75,7 @@
         
         <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-header bg-danger text-white">
-                <i class="fas fa-exclamation-circle me-2"></i>
+                <i class="bi bi-exclamation-circle me-2"></i>
                 <strong class="me-auto">Ошибка</strong>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>

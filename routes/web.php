@@ -8,6 +8,7 @@ use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoriesController;
+use App\Http\Controllers\WelcomeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,6 +20,9 @@ use App\Http\Controllers\CategoriesController;
 | будут принадлежать группе посредников "web".
 |
 */
+
+// Главная страница
+Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
 // шапка
 
@@ -108,6 +112,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy'); // Удаление профиля
     Route::get('/user', [ProfileController::class, 'index'])->name('user');
 
+    // Маршрут для выхода из системы
+    Route::post('/logout', [ProfileController::class, 'logout'])->name('logout');
+    Route::get('/logout', [ProfileController::class, 'logout']); // Дополнительный GET-маршрут для удобства
 
     // Корзина
     Route::get('/add-to-cart/{id}', [CartController::class, 'addToCart']);
@@ -122,3 +129,11 @@ Route::middleware('auth')->group(function () {
 
 // Аутентификация
 require __DIR__.'/auth.php';
+
+Route::get('/debug-categories', function() {
+    $categories = \App\Models\Category::all();
+    return response()->json([
+        'count' => $categories->count(),
+        'categories' => $categories->toArray()
+    ]);
+});

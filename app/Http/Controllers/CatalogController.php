@@ -24,4 +24,29 @@ class CatalogController extends Controller
         }
         return view('catalog', ['products' => $products, 'categories' => $categories, 'params' => $params]);
     }
+    
+    public function category(Request $request, $category)
+    {
+        $products = DB::table('products')
+            ->where('qty', '>', 0)
+            ->where('product_type', $category)
+            ->get();
+            
+        $categories = DB::table('categories')->get();
+        $params = collect($request->query());
+        
+        if ($params->get('sort_by')) {
+            $products = $products->sortBy($params->get('sort_by'));
+        }
+        if ($params->get('sort_by_desc')) {
+            $products = $products->sortByDesc($params->get('sort_by_desc'));
+        }
+        
+        return view('catalog', [
+            'products' => $products, 
+            'categories' => $categories, 
+            'params' => $params,
+            'currentCategory' => $category
+        ]);
+    }
 }

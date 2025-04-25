@@ -3,52 +3,72 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller {
 
     public function index()
     {
-        // Получаем популярные категории (родительские с дочерними)
-        $popularCategories = Category::with(['children' => function($query) {
-                $query->limit(5); // Ограничиваем количество подкатегорий
-            }])
-            ->whereNull('parent_id')
-            ->orderByDesc('views')
-            ->limit(3)
-            ->get();
-    
-        // Сезонные товары
-        $seasonalProducts = Product::where('is_seasonal', true)
-            ->with('category')
-            ->orderByDesc('created_at')
-            ->limit(3)
-            ->get();
-    
-        // Товары со скидками
-        $discountedProducts = Product::where('discount', '>', 0)
-            ->with('category')
-            ->orderByDesc('discount')
-            ->limit(3)
-            ->get();
+        try {
+            // Получаем все категории
+            $categories = DB::table('categories')
+                ->select('id', 'product_type')
+                ->get();
 
-        // Товары для основной секции
-        $products = Product::with('category')
-            ->orderByDesc('created_at')
-            ->limit(6)
-            ->get();
+            // Получаем последний добавленный товар
+            $latestProduct = DB::table('products')
+                ->select('id', 'img', 'title')
+                ->orderBy('created_at', 'desc')
+                ->first();
 
-        // Топ категории товары
-        $topCategoriesProducts = Product::with('category')
-            ->orderByDesc('views')
-            ->limit(4)
-            ->get();
-    
-        return view('welcome', compact(
-            'popularCategories',
-            'seasonalProducts',
-            'discountedProducts',
-            'products',
-            'topCategoriesProducts'
-        ));
+            // Получаем сезонные товары
+            $seasonalProducts = DB::table('products')
+                ->select('id', 'img', 'title')
+                ->orderBy('created_at', 'desc')
+                ->take(5)
+                ->get();
+
+            // Получаем товары со скидками
+            $promotionProducts = DB::table('products')
+                ->select('id', 'img', 'title')
+                ->where('discount', '>', 0)
+                ->orderBy('created_at', 'desc')
+                ->take(5)
+                ->get();
+
+            // Получаем популярные товары
+            $topCategoriesProducts = DB::table('products')
+                ->select('id', 'img', 'title', 'price')
+                ->orderBy('created_at', 'desc')
+                ->take(8)
+                ->get();
+
+            // Получаем все товары
+            $products = DB::table('products')
+                ->select('id', 'img', 'title')
+                ->orderBy('created_at', 'desc')
+                ->take(6)
+                ->get();
+
+            return view('welcome', compact(
+                'categories',
+                'latestProduct',
+                'seasonalProducts',
+                'promotionProducts',
+                'topCategoriesProducts',
+                'products'
+            ));
+
+        } catch (\Exception $e) {
+            // В случае ошибки возвращаем пустые данные
+            return view('welcome', [
+                'categories' => collect(),
+                'latestProduct' => null,
+                'seasonalProducts' => collect(),
+                'promotionProducts' => collect(),
+                'topCategoriesProducts' => collect(),
+                'products' => collect()
+            ]);
+        }
     }
 } 

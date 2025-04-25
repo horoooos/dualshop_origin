@@ -11,7 +11,7 @@ class CategorySeeder extends Seeder
     /**
      * Seed the application's database.
      */
-    public function run()
+    public function run(): void
     {
         DB::table('categories')->insert([
             [
@@ -26,7 +26,6 @@ class CategorySeeder extends Seeder
                 'id' => 3,
                 'product_type' => 'Дополнительно',
             ],
-        ]
-        );
+        ]);
     }
 }
