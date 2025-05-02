@@ -9,6 +9,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\WelcomeController;
+use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\SearchController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,60 +26,19 @@ use App\Http\Controllers\WelcomeController;
 // Главная страница
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 
-// шапка
-
+// Каталог и продукты
 Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog');
 Route::get('/catalog/{category}', [CatalogController::class, 'category'])->name('catalog.category');
 Route::get('/product/{product}', [ProductController::class, 'show'])->name('product.show');
-
-Route::get('/about', function () {
-    return view('about');
-})->name('about');
-
-Route::get('/shops', function () {
-    return view('shops');
-})->name('shops');
-
-Route::get('/where', function () {
-    return view('where');
-})->name('where');
-
-Route::get('/delivery', function () {
-    return view('delivery');
-})->name('delivery');
-
-Route::get('/stores', function () {
-    return view('stores');
-})->name('stores');
-
-Route::get('/promotions', function () {
-    return view('promotions');
-})->name('promotions');
-
-Route::get('/cart', function () {
-    return view('cart');
-})->name('cart');
-
-Route::get('/favorites', function () {
-    return view('favorites');
-})->name('favorites');
-
-Route::get('/user', function () {
-    return view('user');
-})->name('user');
-
-Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
 Route::get('/search', [SearchController::class, 'index'])->name('search');
 
-// Маршруты для страниц
-Route::get('/', [AboutController::class, 'index'])->name('about');
+// Статические страницы
 Route::get('/about', [AboutController::class, 'index'])->name('about');
-Route::get('/catalog', [CatalogController::class, 'getProducts'])->name('catalog');
-Route::get('/product/{id}', [ProductController::class, 'index'])->name('product');
-Route::get('/where', function () {
-    return view('where');
-})->name('where');
+Route::get('/shops', function () { return view('shops'); })->name('shops');
+Route::get('/where', function () { return view('where'); })->name('where');
+Route::get('/delivery', function () { return view('delivery'); })->name('delivery');
+Route::get('/stores', function () { return view('stores'); })->name('stores');
+Route::get('/promotions', function () { return view('promotions'); })->name('promotions');
 
 // Маршруты для администратора
 Route::middleware(['auth', 'is-admin'])->group(function () {
@@ -103,23 +64,23 @@ Route::middleware(['auth', 'is-admin'])->group(function () {
     Route::patch('/order-status/{action}/{number}', [OrderController::class, 'editOrderStatus']);
 });
 
-// Маршруты для пользователей
+// Маршруты для авторизованных пользователей
 Route::middleware('auth')->group(function () {
     // Профиль пользователя
-    Route::get('/profile', [ProfileController::class, 'index'])->name('user'); // Страница профиля
-    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit'); // Страница редактирования
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update'); // Обновление профиля
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy'); // Удаление профиля
-    Route::get('/user', [ProfileController::class, 'index'])->name('user');
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Маршрут для выхода из системы
-    Route::post('/logout', [ProfileController::class, 'logout'])->name('logout');
-    Route::get('/logout', [ProfileController::class, 'logout']); // Дополнительный GET-маршрут для удобства
+    // Избранные товары
+    Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites');
+    Route::post('/favorites/{product}/toggle', [FavoriteController::class, 'toggle'])->name('favorites.toggle');
 
     // Корзина
-    Route::get('/add-to-cart/{id}', [CartController::class, 'addToCart']);
     Route::get('/cart', [CartController::class, 'index'])->name('cart');
-    Route::get('/changeqty/{param}/{id}', [CartController::class, 'changeQty'])->name('changeQty');
+    Route::post('/add-to-cart/{product}', [CartController::class, 'addToCart'])->name('cart.add');
+    Route::post('/cart/{cartItem}/change-quantity', [CartController::class, 'changeQty'])->name('cart.change-quantity');
+    Route::delete('/cart/{cartItem}', [CartController::class, 'remove'])->name('cart.remove');
     
     // Заказы
     Route::get('/create-order', [OrderController::class, 'index'])->name('create-order');

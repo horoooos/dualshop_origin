@@ -4,108 +4,81 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Product;
+use App\Models\CartItem;
 
 class CartController extends Controller
 {
     // Изменение количества товара в корзине
-    public function changeQty(Request $request)
+    public function changeQty(Request $request, CartItem $cartItem)
     {
-        $cartItem = DB::table('cart')
-            ->where('uid', $request->user()->id)
-            ->where('id', $request->id)
-            ->first();
-
-        if (!$cartItem) {
-            return response()->json(['error' => 'Товар в корзине не найден'], 404);
-        }
-
-        $product = DB::table('products')->where('id', $cartItem->pid)->first();
-
-        if (!$product) {
-            return response()->json(['error' => 'Товар не найден'], 404);
-        }
-
-        if ($request->param === 'incr') {
-            if ($cartItem->qty < $product->qty) {
-                DB::table('cart')
-                    ->where('id', $request->id)
-                    ->update(['qty' => $cartItem->qty + 1]);
-                return response()->json(['success' => true]);
+        $action = $request->input('action');
+        
+        if ($action === 'increase') {
+            if ($cartItem->quantity < $cartItem->product->qty) {
+                $cartItem->increment('quantity');
             }
-            return response()->json(['error' => 'Достигнут лимит доступного количества товара'], 400);
+        } elseif ($action === 'decrease' && $cartItem->quantity > 1) {
+            $cartItem->decrement('quantity');
         }
 
-        if ($request->param === 'decr') {
-            if ($cartItem->qty > 1) {
-                DB::table('cart')
-                    ->where('id', $request->id)
-                    ->update(['qty' => $cartItem->qty - 1]);
-            } else {
-                DB::table('cart')->where('id', $request->id)->delete();
-            }
-            return response()->json(['success' => true]);
-        }
-
-        return response()->json(['error' => 'Неверный параметр'], 400);
+        return redirect()->back();
     }
 
     // Отображение корзины
-    public function index(Request $request)
+    public function index()
     {
-        $cartItems = DB::table('cart')
-            ->where('uid', $request->user()->id)
-            ->get();
-
-        $goodCart = $cartItems->map(function ($cartItem) {
-            $product = DB::table('products')
-                ->select('title', 'price', 'qty')
-                ->where('id', $cartItem->pid)
-                ->first();
-
-            return (object)[
-                'id' => $cartItem->id,
-                'title' => $product->title ?? 'Неизвестный товар',
-                'price' => $product->price ?? 0,
-                'qty' => $cartItem->qty,
-                'limit' => $product->qty ?? 0,
-            ];
-        });
-
-        return view('cart', ['cart' => $goodCart]);
+        $items = auth()->user()->cartItems()->with('product')->get();
+        return view('cart', compact('items'));
     }
 
     // Добавление товара в корзину
-    public function addToCart(Request $request)
+    public function addToCart(Product $product)
     {
-        $product = DB::table('products')->where('id', $request->id)->first();
-
-        if (!$product) {
-            return response()->json(['error' => 'Товар не найден'], 404);
-        }
-
-        $cartTable = DB::table('cart');
-        $itemInCart = $cartTable
-            ->where('uid', $request->user()->id)
-            ->where('pid', $request->id)
-            ->first();
-
-        if (!$itemInCart) {
-            $cartTable->insert([
-                'uid' => $request->user()->id,
-                'pid' => $request->id,
-                'qty' => 1,
+        $user = auth()->user();
+        
+        if ($product->qty <= 0) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Товара нет в наличии'
             ]);
-            return response()->json(['success' => 'Товар добавлен в корзину']);
         }
 
-        if ($product->qty > $itemInCart->qty) {
-            $cartTable
-                ->where('uid', $request->user()->id)
-                ->where('pid', $request->id)
-                ->update(['qty' => $itemInCart->qty + 1]);
-            return response()->json(['success' => 'Количество товара увеличено']);
+        $cartItem = $user->cartItems()->where('product_id', $product->id)->first();
+
+        if ($cartItem) {
+            if ($cartItem->quantity < $product->qty) {
+                $cartItem->increment('quantity');
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Количество товара в корзине увеличено'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Достигнут лимит доступного количества товара'
+                ]);
+            }
+        } else {
+            $user->cartItems()->create([
+                'product_id' => $product->id,
+                'quantity' => 1
+            ]);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Товар успешно добавлен в корзину'
+            ]);
+        }
+    }
+
+    // Удаление товара из корзины
+    public function remove(CartItem $cartItem)
+    {
+        if ($cartItem->user_id !== auth()->id()) {
+            return redirect()->back()->with('error', 'У вас нет прав на удаление этого товара');
         }
 
-        return response()->json(['error' => 'Достигнут лимит доступного количества товара'], 400);
+        $cartItem->delete();
+        return redirect()->back()->with('success', 'Товар успешно удален из корзины');
     }
 }

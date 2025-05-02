@@ -6,29 +6,24 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Models\CartItem;
+use App\Models\Order;
 
 class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $cartTable = DB::table('cart')->where('uid', $request->user()->id)->get();
-        $goodCart = [];
+        $cartItems = $request->user()->cartItems()->with('product')->get();
         $total = 0;
 
-        foreach ($cartTable as $cartItem) {
-            $product = DB::table('products')->select('title', 'price', 'qty')->where('id', $cartItem->pid)->first();
-            $total += $cartItem->qty * $product->price;
-
-            $goodCart[] = (object)[
-                'id' => $cartItem->id,
-                'title' => $product->title,
-                'price' => $product->price,
-                'qty' => $cartItem->qty,
-                'limit' => $product->qty,
-            ];
+        foreach ($cartItems as $item) {
+            $total += $item->quantity * $item->product->price;
         }
 
-        return view('createOrder', ['cart' => $goodCart, 'total' => $total]);
+        return view('createOrder', [
+            'cart' => $cartItems,
+            'total' => $total
+        ]);
     }
 
     public function createOrder(Request $request)
@@ -37,90 +32,101 @@ class OrderController extends Controller
             'password' => 'required|string',
         ]);
 
-        if (Hash::check($request->get('password'), $request->user()->password)) {
-            $orderNumber = $this->generateOrderNumber();
-            $userCartTable = DB::table('cart')->where('uid', $request->user()->id)->get();
-
-            DB::transaction(function () use ($userCartTable, $orderNumber, $request) {
-                foreach ($userCartTable as $cartItem) {
-                    DB::table('orders')->insert([
-                        'uid' => $cartItem->uid,
-                        'pid' => $cartItem->pid,
-                        'qty' => $cartItem->qty,
-                        'number' => $orderNumber,
-                        'created_at' => now(),
-                        'status' => 'Новый',
-                    ]);
-                }
-
-                DB::table('cart')->where('uid', $request->user()->id)->delete();
-            });
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Заказ успешно сформирован! Номер вашего заказа: ' . $orderNumber,
-                'orderNumber' => $orderNumber
-            ]);
-        } else {
+        if (!Hash::check($request->get('password'), $request->user()->password)) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Неверный пароль. Пожалуйста, проверьте правильность введенного пароля.'
             ], 403);
         }
+
+        $cartItems = $request->user()->cartItems()->with('product')->get();
+        
+        if ($cartItems->isEmpty()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Корзина пуста'
+            ], 400);
+        }
+
+        $orderNumber = $this->generateOrderNumber();
+
+        DB::transaction(function () use ($cartItems, $orderNumber, $request) {
+            foreach ($cartItems as $item) {
+                Order::create([
+                    'user_id' => $request->user()->id,
+                    'product_id' => $item->product_id,
+                    'quantity' => $item->quantity,
+                    'number' => $orderNumber,
+                    'status' => 'Новый',
+                ]);
+
+                // Уменьшаем количество товара на складе
+                $item->product->decrement('qty', $item->quantity);
+            }
+
+            // Очищаем корзину
+            $request->user()->cartItems()->delete();
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Заказ успешно сформирован! Номер вашего заказа: ' . $orderNumber,
+            'orderNumber' => $orderNumber
+        ]);
     }
 
     private function generateOrderNumber()
     {
         do {
             $orderNumber = Str::random(8);
-        } while (DB::table('orders')->where('number', $orderNumber)->exists());
+        } while (Order::where('number', $orderNumber)->exists());
 
         return $orderNumber;
     }
 
     public function getOrders(Request $request)
     {
-        $goodOrders = [];
         $filter = $request->query('filter');
-        $ordersTable = DB::table('orders');
+        $query = Order::with(['user', 'product']);
 
         if ($filter === 'new') {
-            $ordersTable->where('status', 'Новый');
+            $query->where('status', 'Новый');
         } elseif ($filter === 'confirmed') {
-            $ordersTable->where('status', 'Подтвержден');
+            $query->where('status', 'Подтвержден');
         } elseif ($filter === 'canceled') {
-            $ordersTable->where('status', 'Отменен');
+            $query->where('status', 'Отменен');
         }
 
-        $ordersTable = $ordersTable->get()->groupBy('number');
+        $orders = $query->get()->groupBy('number');
+        $goodOrders = [];
 
-        foreach ($ordersTable as $orderGroup) {
-            $openedOrder = $orderGroup->all();
-            $user = DB::table('users')->where('id', $openedOrder[0]->uid)->first(['name', 'surname', 'patronymic']);
+        foreach ($orders as $orderGroup) {
+            $firstOrder = $orderGroup->first();
+            $user = $firstOrder->user;
             $totalPrice = 0;
             $totalQty = 0;
             $products = [];
 
-            foreach ($openedOrder as $orderItem) {
-                $product = DB::table('products')->where('id', $orderItem->pid)->first();
-                $totalPrice += $product->price * $orderItem->qty;
-                $totalQty += $orderItem->qty;
+            foreach ($orderGroup as $orderItem) {
+                $product = $orderItem->product;
+                $totalPrice += $product->price * $orderItem->quantity;
+                $totalQty += $orderItem->quantity;
 
                 $products[] = (object)[
                     'title' => $product->title,
                     'price' => $product->price,
-                    'qty' => $orderItem->qty,
+                    'qty' => $orderItem->quantity,
                 ];
             }
 
             $goodOrders[] = (object)[
                 'name' => $user->surname . ' ' . $user->name . ' ' . $user->patronymic,
-                'number' => $openedOrder[0]->number,
+                'number' => $firstOrder->number,
                 'products' => $products,
-                'date' => $openedOrder[0]->created_at,
+                'date' => $firstOrder->created_at,
                 'totalPrice' => $totalPrice,
                 'totalQty' => $totalQty,
-                'status' => $openedOrder[0]->status,
+                'status' => $firstOrder->status,
             ];
         }
 
@@ -133,35 +139,39 @@ class OrderController extends Controller
             return abort(400, 'Invalid action');
         }
 
-        $order = DB::table('orders')->where('number', $number);
-
-        if (!$order->exists()) {
+        $orders = Order::where('number', $number);
+        
+        if (!$orders->exists()) {
             return abort(404, 'Order not found');
         }
 
         $status = $action === 'confirm' ? 'Подтвержден' : 'Отменен';
-        $order->update(['status' => $status]);
+        $orders->update(['status' => $status]);
 
         return redirect()->route('admin.orders')->with('success', 'Статус заказа успешно обновлен');
     }
 
     public function deleteOrder($number)
     {
-        $order = DB::table('orders')->where('number', $number);
+        $orders = Order::where('number', $number);
         
-        if (!$order->exists()) {
+        if (!$orders->exists()) {
             return abort(404, 'Заказ не найден');
         }
 
-        // Проверяем, что заказ в статусе "Новый"
-        $orderStatus = $order->first()->status;
-        if ($orderStatus !== 'Новый') {
+        $firstOrder = $orders->first();
+        if ($firstOrder->status !== 'Новый') {
             return back()->with('error', 'Можно удалять только новые заказы');
         }
 
-        // Удаляем заказ
-        $order->delete();
+        // Возвращаем товары на склад
+        foreach ($orders->get() as $order) {
+            $order->product->increment('qty', $order->quantity);
+        }
 
-        return redirect('/user')->with('success', 'Заказ успешно удален');
+        // Удаляем заказ
+        $orders->delete();
+
+        return redirect()->route('profile.index')->with('success', 'Заказ успешно удален');
     }
 }

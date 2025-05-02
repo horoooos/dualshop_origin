@@ -17,21 +17,21 @@
             <tbody>
             @foreach($cart as $item)
                 <tr class="cart__raw">
-                    <td>{{$item->title}}</td>
+                    <td>{{ $item->product->title }}</td>
                     <td class="cart__qty">
                         <span class="cart__qty-value">
-                            {{ $item->qty }}
+                            {{ $item->quantity }}
                         </span>
                     </td>
-                    <td>{{$item->price}} ₽</td>
-                    <td>{{$item->price * $item->qty}} ₽</td>
+                    <td>{{ number_format($item->product->price, 2) }} ₽</td>
+                    <td>{{ number_format($item->product->price * $item->quantity, 2) }} ₽</td>
                 </tr>
             @endforeach
             </tbody>
         </table>
         
         <div class="order-total">
-            К оплате: <span class="order-total__price">{{ $total }} ₽</span>
+            К оплате: <span class="order-total__price">{{ number_format($total, 2) }} ₽</span>
         </div>
         
         <form class="order-form">
@@ -65,24 +65,39 @@ $(document).ready(function() {
             _token: '{{ csrf_token() }}'
         })
         .done(function(response) {
-            Swal.fire({
-                title: 'Успех!',
-                text: response.message,
-                icon: 'success',
-                confirmButtonText: 'OK',
-                background: '#1c1c1e',
-                color: '#ffffff',
-                confirmButtonColor: '#34c38f'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = '/user';
-                }
-            });
+            if (response.status === 'success') {
+                Swal.fire({
+                    title: 'Успех!',
+                    text: response.message,
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    background: '#1c1c1e',
+                    color: '#ffffff',
+                    confirmButtonColor: '#34c38f'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '{{ route('profile.index') }}';
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: 'Ошибка!',
+                    text: response.message,
+                    icon: 'error',
+                    background: '#1c1c1e',
+                    color: '#ffffff',
+                    confirmButtonColor: '#34c38f'
+                });
+            }
         })
-        .fail(function() {
+        .fail(function(xhr) {
+            let message = 'Произошла ошибка при создании заказа';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                message = xhr.responseJSON.message;
+            }
             Swal.fire({
                 title: 'Ошибка!',
-                text: 'Неверный пароль. Пожалуйста, проверьте правильность введенного пароля.',
+                text: message,
                 icon: 'error',
                 background: '#1c1c1e',
                 color: '#ffffff',

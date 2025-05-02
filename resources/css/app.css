@@ -712,6 +712,7 @@ header{
   transition: all 0.3s ease;
   border: 2px solid #000;
   max-height: 180px;
+  min-width: 100% !important;
   color: #fff;
 }
 
@@ -738,9 +739,6 @@ header{
   transition: all 0.3s ease;
 }
 
-.show-more-card:hover .show-more-btn i {
-  transform: rotate(180deg);
-}
 
 .product-badge {
   position: absolute;
@@ -796,6 +794,19 @@ header{
   font-size: 12px;
   width: fit-content;
   z-index: 1000;
+  text-decoration: none;
+}
+
+.product-detail-btn2 {
+  background: #000;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 6px 20px;
+  font-size: 12px;
+  width: fit-content;
+  z-index: 1000;
+  width: 100%;
   text-decoration: none;
 }
 

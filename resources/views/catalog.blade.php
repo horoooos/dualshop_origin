@@ -42,10 +42,12 @@
                                 от {{ number_format($product->price / 12, 0, ',', ' ') }} ₽/мес
                             </div>
                             @auth
-                            <div class="product-actions">
-                                <button class="btn-buy">Купить</button>
-                                <button class="btn-favorite">
-                                    <i class="bi bi-heart"></i>
+                            <div class="product-actions d-flex gap-2">
+                                <button onclick="addToCart({{ $product->id }})" class="btn btn-dark">
+                                    <i class="bi bi-cart-plus"></i> В корзину
+                                </button>
+                                <button onclick="toggleFavorite({{ $product->id }})" class="btn btn-outline-danger favorite-toggle" data-product-id="{{ $product->id }}">
+                                    <i class="bi bi-heart{{ auth()->user()->favorites->contains($product->id) ? '-fill' : '' }}"></i>
                                 </button>
                             </div>
                             @endauth
@@ -69,7 +71,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
             <div class="toast-body bg-success text-white">
-                Товар успешно добавлен в корзину
+                Товар добавлен в корзину
             </div>
         </div>
         
@@ -87,42 +89,112 @@
 
     <script>
     function addToCart(productId) {
-        fetch(`/add-to-cart/${productId}`)
-            .then(response => {
-                if (response.ok) {
-                    const toast = new bootstrap.Toast(document.getElementById('successToast'), {
-                        autohide: true,
-                        delay: 3000
-                    });
-                    toast.show();
-                } else {
-                    const toast = new bootstrap.Toast(document.getElementById('errorToast'), {
-                        autohide: true,
-                        delay: 3000
-                    });
-                    toast.show();
+        if(!productId) return;
+        
+        fetch(`/add-to-cart/${productId}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const toast = new bootstrap.Toast(
+                document.getElementById(data.status === 'success' ? 'successToast' : 'errorToast')
+            );
+            
+            if (data.status === 'success') {
+                document.querySelector('#successToast .toast-body').textContent = data.message;
+                // Обновляем количество товаров в корзине в шапке
+                const cartCount = document.querySelector('.cart-count');
+                if (cartCount) {
+                    cartCount.textContent = parseInt(cartCount.textContent || 0) + 1;
                 }
-            })
-            .catch(() => {
-                const toast = new bootstrap.Toast(document.getElementById('errorToast'), {
-                    autohide: true,
-                    delay: 3000
-                });
-                toast.show();
-            });
+            } else {
+                document.querySelector('#errorToast .toast-body').textContent = data.message;
+            }
+            
+            toast.show();
+        })
+        .catch(error => {
+            const toast = new bootstrap.Toast(document.getElementById('errorToast'));
+            document.querySelector('#errorToast .toast-body').textContent = 'Произошла ошибка при добавлении товара';
+            toast.show();
+        });
+    }
+
+    function toggleFavorite(productId) {
+        if(!productId) return;
+        
+        fetch(`/favorites/${productId}/toggle`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const button = document.querySelector(`.favorite-toggle[data-product-id="${productId}"] i`);
+            if (data.status === 'added') {
+                button.classList.remove('bi-heart');
+                button.classList.add('bi-heart-fill');
+            } else {
+                button.classList.remove('bi-heart-fill');
+                button.classList.add('bi-heart');
+            }
+        })
+        .catch(error => {
+            const toast = new bootstrap.Toast(document.getElementById('errorToast'));
+            document.querySelector('#errorToast .toast-body').textContent = 'Произошла ошибка при обновлении избранного';
+            toast.show();
+        });
     }
     </script>
 
     <style>
+    .product-actions {
+        margin-top: 1rem;
+    }
+
+    .btn-dark {
+        background-color: #000;
+        border-color: #000;
+        color: #fff;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-dark:hover {
+        background-color: #333;
+        border-color: #333;
+    }
+
+    .btn-outline-danger {
+        border-color: #dc3545;
+        color: #dc3545;
+        padding: 0.5rem 0.75rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-danger:hover {
+        background-color: #dc3545;
+        color: #fff;
+    }
+
+    .favorite-toggle {
+        min-width: 42px;
+    }
+
     .toast {
         min-width: 300px;
         background: transparent;
         border: none;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         margin-bottom: 10px;
-        position: relative;
-        right: 0;
-        opacity: 1 !important;
     }
 
     .toast-header {

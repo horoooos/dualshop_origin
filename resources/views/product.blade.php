@@ -65,20 +65,46 @@
 
     <script>
     function addToCart(productId) {
-        fetch(`/add-to-cart/${productId}`)
-            .then(response => {
-                if (response.ok) {
-                    const toast = new bootstrap.Toast(document.getElementById('successToast'));
-                    toast.show();
-                } else {
-                    const toast = new bootstrap.Toast(document.getElementById('errorToast'));
-                    toast.show();
-                }
-            })
-            .catch(() => {
+        if(!productId) return;
+        
+        fetch(`/add-to-cart/${productId}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                const toast = new bootstrap.Toast(document.getElementById('successToast'));
+                toast.show();
+            } else {
                 const toast = new bootstrap.Toast(document.getElementById('errorToast'));
                 toast.show();
-            });
+            }
+        })
+        .catch(() => {
+            const toast = new bootstrap.Toast(document.getElementById('errorToast'));
+            toast.show();
+        });
+    }
+
+    function changeQuantity(cartItemId, action) {
+        fetch(`/cart/${cartItemId}/change-quantity`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ action })
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            }
+        });
     }
     </script>
     @endauth

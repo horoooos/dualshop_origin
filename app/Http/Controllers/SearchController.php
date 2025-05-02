@@ -3,26 +3,33 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Models\Product;
+use App\Models\Category;
 
 class SearchController extends Controller
 {
     public function index(Request $request)
     {
         $query = $request->input('query');
+        $category = $request->input('category');
         
-        if ($query) {
-            $products = DB::table('products')
-                ->where('title', 'LIKE', "%{$query}%")
-                ->orWhere('description', 'LIKE', "%{$query}%")
-                ->get();
-        } else {
-            $products = collect();
-        }
-
+        $products = Product::where('qty', '>', 0)
+            ->when($query, function($q) use ($query) {
+                return $q->where('title', 'like', "%{$query}%")
+                    ->orWhere('description', 'like', "%{$query}%");
+            })
+            ->when($category, function($q) use ($category) {
+                return $q->where('product_type', $category);
+            })
+            ->get();
+            
+        $categories = Category::all();
+        
         return view('search', [
             'products' => $products,
-            'query' => $query
+            'categories' => $categories,
+            'query' => $query,
+            'selectedCategory' => $category
         ]);
     }
 } 

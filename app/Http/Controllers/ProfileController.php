@@ -9,50 +9,52 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use App\Models\Order;
 
 class ProfileController extends Controller
 {
     /**
      * Display the user's profile form.
      */
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $goodOrders = [];
-        $ordersTable = DB::table('orders')->where('uid', $request->user()->id)->get()->groupBy(['number']);
+        $orders = Order::with(['product'])
+            ->where('user_id', $request->user()->id)
+            ->get()
+            ->groupBy('number');
 
-        foreach ($ordersTable as $order) {
-            $openedOrder = $order->all();
-            $date = $openedOrder[0]->created_at;
-            $orderNumber = $openedOrder[0]->number;
-            $orderStatus = $openedOrder[0]->status;
+        foreach ($orders as $orderGroup) {
+            $firstOrder = $orderGroup->first();
             $totalPrice = 0;
             $totalQty = 0;
             $products = [];
 
-            foreach ($openedOrder as $orderItem) {
-                $product = DB::table('products')->where('id', $orderItem->pid)->first();
-                $totalPrice += $product->price * $orderItem->qty;
-                $totalQty += $orderItem->qty;
+            foreach ($orderGroup as $orderItem) {
+                $totalPrice += $orderItem->product->price * $orderItem->quantity;
+                $totalQty += $orderItem->quantity;
 
-                array_push($products,
-                    (object)[
-                        'title' => $product->title,
-                        'price' => $product->price,
-                        'qty' => $orderItem->qty,
-                    ]);
+                $products[] = (object)[
+                    'title' => $orderItem->product->title,
+                    'price' => $orderItem->product->price,
+                    'qty' => $orderItem->quantity,
+                ];
             }
-            array_push($goodOrders,
-                (object)[
-                    'number' => $orderNumber,
-                    'products' => $products,
-                    'date' => $date,
-                    'totalPrice' => $totalPrice,
-                    'totalQty' => $totalQty,
-                    'status' => $orderStatus,
 
-                ]);
+            $goodOrders[] = (object)[
+                'date' => $firstOrder->created_at,
+                'number' => $firstOrder->number,
+                'status' => $firstOrder->status,
+                'products' => $products,
+                'totalPrice' => $totalPrice,
+                'totalQty' => $totalQty,
+            ];
         }
-        return view('profile.index', ['orders' => $goodOrders]);
+
+        return view('profile.index', [
+            'user' => $request->user(),
+            'orders' => $goodOrders
+        ]);
     }
 
     public function edit(Request $request): View

@@ -5,14 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class CartItem extends Model
+class Cart extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'user_id',
-        'product_id',
-        'quantity'
     ];
 
     public function user()
@@ -20,8 +18,15 @@ class CartItem extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function product()
+    public function items()
     {
-        return $this->belongsTo(Product::class);
+        return $this->hasMany(CartItem::class);
     }
-}
+
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'cart_items')
+            ->withPivot('quantity')
+            ->withTimestamps();
+    }
+} 

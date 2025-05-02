@@ -3,44 +3,52 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Models\Product;
+use App\Models\Category;
 
 class CatalogController extends Controller
 {
-    public function getProducts(Request $request)
+    public function index(Request $request)
     {
-        $products = DB::table('products')->where('qty', '>', 0)->get();
-        $categories = DB::table('categories')->get();
+        $products = Product::where('qty', '>', 0);
+        $categories = Category::all();
         $params = collect($request->query());
 
         if ($params->get('sort_by')) {
-            $products = $products->sortBy($params->get('sort_by'));
+            $products = $products->orderBy($params->get('sort_by'));
         }
         if ($params->get('sort_by_desc')) {
-            $products = $products->sortByDesc($params->get('sort_by_desc'));
+            $products = $products->orderByDesc($params->get('sort_by_desc'));
         }
         if ($params->get('filter')) {
             $products = $products->where('product_type', $params->get('filter'));
         }
-        return view('catalog', ['products' => $products, 'categories' => $categories, 'params' => $params]);
+
+        $products = $products->get();
+
+        return view('catalog', [
+            'products' => $products, 
+            'categories' => $categories, 
+            'params' => $params
+        ]);
     }
     
     public function category(Request $request, $category)
     {
-        $products = DB::table('products')
-            ->where('qty', '>', 0)
-            ->where('product_type', $category)
-            ->get();
+        $products = Product::where('qty', '>', 0)
+            ->where('product_type', $category);
             
-        $categories = DB::table('categories')->get();
+        $categories = Category::all();
         $params = collect($request->query());
         
         if ($params->get('sort_by')) {
-            $products = $products->sortBy($params->get('sort_by'));
+            $products = $products->orderBy($params->get('sort_by'));
         }
         if ($params->get('sort_by_desc')) {
-            $products = $products->sortByDesc($params->get('sort_by_desc'));
+            $products = $products->orderByDesc($params->get('sort_by_desc'));
         }
+        
+        $products = $products->get();
         
         return view('catalog', [
             'products' => $products, 

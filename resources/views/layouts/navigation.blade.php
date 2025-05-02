@@ -17,7 +17,7 @@
             {{ Auth::user()->name }}
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="{{ route('user') }}">Профиль</a></li>
+            <li><a class="dropdown-item" href="{{ route('profile.index') }}">Профиль</a></li>
             <li><hr class="dropdown-divider"></li>
             <li>
               <form method="POST" action="{{ route('logout') }}">
@@ -98,21 +98,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Дублирование профиля для мобильной версии -->
-      @auth
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="{{ route('user') }}">Профиль</a></li>
-          <li><hr class="dropdown-divider"></li>
-          <li>
-            <form method="POST" action="{{ route('logout') }}">
-              @csrf
-              <button type="submit" class="dropdown-item">Выйти</button>
-            </form>
-          </li>
-        </ul>
-      </div>
-      @endauth
     </div>
   </nav>
 </header>

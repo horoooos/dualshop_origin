@@ -269,11 +269,11 @@
         @endforeach
 
         <!-- Дополнительная карточка "Показать больше" -->
-        <div class="col-xl-4 col-md-6">
+        <div class="col-12">
             <div class="product-card position-relative d-flex align-items-center justify-content-center text-center h-100 show-more-card">
-                <a href="{{ route('catalog') }}" class="product-detail-btn1 show-more-btn">
-                    <i class="bi bi-grid-3x3-gap-fill me-2"></i>
+                <a href="{{ route('catalog') }}" class="product-detail-btn1 show-more-btn w-100">
                     Показать больше
+                    <i class="bi bi-arrow-right ms-2"></i>
                 </a>
             </div>
         </div>
@@ -307,7 +307,7 @@
                     @foreach($topCategoriesProducts as $product)
                     <div class="col-6 col-md-4 col-lg-3">
                         <div class="top-categories-card">
-                            <div class="top-categories-badge">{{ $product->is_seasonal ? 'HOT' : '911' }}</div>
+                            <div class="top-categories-badge">{{ $product->is_seasonal ? 'HOT' : 'FIREE' }}</div>
                             <a href="{{ route('product.show', $product->id) }}">
                                 <img src="{{ Vite::asset('resources/media/images/' . $product->img) }}" 
                                      class="top-categories-image" 
@@ -326,7 +326,7 @@
                                 @endfor
                             </div>
                             <div class="top-categories-price">{{ number_format($product->price, 0, ',', ' ') }} ₽</div>
-                            <a href="{{ route('product.show', $product->id) }}" class="top-categories-btn">
+                            <a href="{{ route('product.show', $product->id) }}" class="btn btn-outline-primary product-detail-btn2">
                                 Подробнее
                                 <i class="bi bi-arrow-right-short"></i>
                             </a>
@@ -379,21 +379,107 @@ function addToCart(productId) {
             'Accept': 'application/json'
         }
     })
-    .then(response => {
-        if (response.ok) {
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
             const toast = new bootstrap.Toast(document.getElementById('successToast'));
             toast.show();
         } else {
-            const toast = new bootstrap.Toast(document.getElementById('errorToast'));
+            const errorToast = document.getElementById('errorToast');
+            errorToast.querySelector('.toast-body').textContent = data.error;
+            const toast = new bootstrap.Toast(errorToast);
             toast.show();
         }
     })
     .catch(() => {
-        const toast = new bootstrap.Toast(document.getElementById('errorToast'));
+        const errorToast = document.getElementById('errorToast');
+        errorToast.querySelector('.toast-body').textContent = 'Произошла ошибка при добавлении товара';
+        const toast = new bootstrap.Toast(errorToast);
         toast.show();
+    });
+}
+
+function changeQuantity(cartItemId, action) {
+    fetch(`/cart/${cartItemId}/change-quantity`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ action })
+    })
+    .then(response => {
+        if (response.ok) {
+            window.location.reload();
+        }
     });
 }
 </script>
 @endauth
+
+<style>
+.show-more-card {
+    min-height: 100px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    background: black;
+}
+
+.show-more-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    animation: shine 3s infinite;
+    z-index: 32;
+}
+
+@keyframes shine {
+    0% {
+        left: -100%;
+    }
+    20% {
+        left: 100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+.show-more-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.show-more-btn {
+    font-size: 1.2rem;
+    color: white;
+    text-decoration: none;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.show-more-btn:hover {
+    color: white;
+}
+
+</style>
 
 @endsection
