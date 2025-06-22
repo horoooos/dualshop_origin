@@ -14,7 +14,10 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             CategorySeeder::class,
-            ProductSeeder::class,
+            TestProductSeeder::class,
+            NewsSeeder::class,
+            // ProductSpecificationSeeder::class,
+            // Добавьте другие сидеры по необходимости
         ]);
     }
 }

@@ -36,8 +36,30 @@ class RegisteredUserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'surname' => ['required', 'string', 'max:255'],
-            'login' => 'required|string|regex:/^[a-zA-Z0-9_.]*$/|min:6|max:32',
-            'patronymic' => 'string|max:32',
+            'login' => [
+                'required',
+                'string',
+                'regex:/^[a-zA-Z0-9_.]*$/',
+                'min:6',
+                'max:32',
+                'unique:users,login'
+            ],
+            'patronymic' => ['nullable', 'string', 'max:32'],
+            'terms' => ['required', 'accepted'],
+        ], [
+            'login.unique' => 'Этот логин уже занят',
+            'login.regex' => 'Логин может содержать только латинские буквы, цифры, точку и нижнее подчеркивание',
+            'login.min' => 'Логин должен быть не менее 6 символов',
+            'login.max' => 'Логин должен быть не более 32 символов',
+            'email.unique' => 'Этот email уже зарегистрирован',
+            'password.confirmed' => 'Пароли не совпадают',
+            'name.required' => 'Укажите имя',
+            'surname.required' => 'Укажите фамилию',
+            'email.required' => 'Укажите email',
+            'email.email' => 'Укажите корректный email',
+            'password.required' => 'Укажите пароль',
+            'terms.required' => 'Необходимо согласиться с правилами сайта',
+            'terms.accepted' => 'Необходимо согласиться с правилами сайта'
         ]);
 
         $user = User::create([

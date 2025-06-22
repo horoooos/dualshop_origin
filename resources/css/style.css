@@ -82,3 +82,281 @@
         display: none;
     }
 }
+
+/* Delivery page custom styles */
+.custom-delivery-page {
+    font-family: inherit;
+    color: #000;
+}
+.user-address {
+    display: block;
+    color: #666;
+    font-size: 0.97rem;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    font-style: italic;
+    word-break: break-word;
+}
+.btn-dark {
+    background-color: #000;
+    border-color: #000;
+    color: #fff;
+    transition: background 0.2s, border 0.2s;
+}
+.btn-dark:hover, .btn-dark:focus {
+    background-color: #222;
+    border-color: #222;
+    color: #fff;
+}
+.custom-map-card {
+    background: #fff;
+    border: 1px solid #e3e3e3;
+    border-radius: 8px;
+    margin-top: 24px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.10);
+    position: relative;
+    overflow: hidden;
+}
+.custom-map-img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 0 0 8px 8px;
+    display: block;
+}
+.map-legend {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(255,255,255,0.95);
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    font-weight: 500;
+    z-index: 2;
+}
+.map-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+.map-dot-red { background: #d00; }
+.map-dot-blue { background: #007bff; }
+
+/* Карточка доставки */
+.custom-delivery-page .card {
+    background: #fff;
+    border: 1px solid #e3e3e3;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.10);
+    margin-bottom: 20px;
+}
+.custom-delivery-page .card-body {
+    padding: 18px 20px 18px 20px;
+    color: #000;
+}
+.custom-delivery-page .card-title {
+    font-size: 1.15rem;
+    color: #000;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+.custom-delivery-page .card-text {
+    font-size: 1rem;
+    color: #222;
+}
+.custom-delivery-page .form-label {
+    color: #000;
+    font-weight: 500;
+}
+.custom-delivery-page .form-control {
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    color: #000;
+    background: #fafafa;
+}
+.custom-delivery-page .form-control:focus {
+    border-color: #000;
+    box-shadow: 0 0 0 2px #0001;
+}
+.custom-delivery-page .input-group {
+    align-items: center;
+}
+.custom-delivery-page .alert {
+    border-radius: 6px;
+    font-size: 1rem;
+    color: #000;
+    background: #f8f9fa;
+    border: 1px solid #e3e3e3;
+}
+.custom-delivery-page .btn {
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 8px 24px;
+}
+.custom-delivery-page .fw-bold {
+    font-weight: 700;
+}
+.custom-delivery-page .accordion-item {
+    border-radius: 8px !important;
+    margin-bottom: 8px;
+}
+.custom-delivery-page .accordion-button {
+    background: #f7f7f7;
+    color: #000;
+    font-weight: 500;
+    border-radius: 8px !important;
+    font-size: 1rem;
+    transition: background 0.2s;
+}
+.custom-delivery-page .accordion-button:not(.collapsed) {
+    background: #ececec;
+    color: #000;
+}
+.custom-delivery-page .accordion-body {
+    color: #000;
+    background: #fff;
+    border-radius: 0 0 8px 8px;
+    font-size: 0.98rem;
+}
+
+/* Стили для страницы новостей */
+.custom-news-page {
+    max-width: 1200px;
+}
+.custom-news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+.news-card {
+    transition: all 0.3s ease;
+    height: 100%;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.news-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+.news-link {
+    color: inherit;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.news-img {
+    height: 200px;
+    object-fit: cover;
+}
+.news-title {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 0.3rem;
+    color: #333;
+}
+.news-date {
+    color: #666;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+.news-text {
+    color: #444;
+    font-size: 0.9rem;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+.news-meta {
+    margin-top: auto;
+    color: #888;
+    font-size: 0.85rem;
+}
+.news-icon {
+    margin-right: 1rem;
+}
+.news-pagination-label {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Стили для детальной страницы новости */
+.custom-news-detail {
+    max-width: 900px;
+}
+.news-detail-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+.news-detail-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 1rem;
+}
+.news-detail-meta {
+    display: flex;
+    gap: 1rem;
+    color: #666;
+    font-size: 0.9rem;
+}
+.news-detail-image-container {
+    margin: 1.5rem 0;
+    text-align: center;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.news-detail-image {
+    max-width: 100%;
+    height: auto;
+    max-height: 500px;
+    object-fit: contain;
+}
+.news-detail-content {
+    line-height: 1.7;
+    color: #444;
+    font-size: 1.05rem;
+}
+.news-detail-content p {
+    margin-bottom: 1.2rem;
+}
+.news-detail-content img {
+    max-width: 100%;
+    height: auto;
+    margin: 1.5rem 0;
+    border-radius: 5px;
+}
+.related-news-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 0.5rem;
+}
+
+@media (max-width: 767px) {
+    .custom-news-grid, 
+    .custom-news-detail .custom-news-grid {
+        grid-template-columns: 1fr;
+    }
+    .custom-news-detail {
+        padding: 1rem;
+    }
+    .news-detail-card {
+        padding: 1.5rem;
+    }
+    .news-detail-title {
+        font-size: 1.5rem;
+    }
+}
+
+

@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Yeseva+One&display=swap');
 @import url(./aboutSection.css);
 @import url(./catalog.css);
+@import url(./search.css);
 @import url('https://fonts.googleapis.com/css2?family=Danfo&family=PT+Sans+Narrow:wght@400;700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=PT+Sans+Narrow:wght@400;700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
 
@@ -263,9 +264,10 @@ header{
   .btn-banner {
     display: inline-flex;       /* Используем flex для точного контроля */
     align-items: center;        /* Вертикальное выравнивание */
-    justify-content: center;    /* Горизонтальное выравнивание */
+    justify-content: center; 
+    border: none !important;   /* Горизонтальное выравнивание */
     background-color: black;
-    border-radius: 5%;
+    border-radius: 5px;
     height: 29px;               /* Замена max-height на фиксированную высоту */
     min-width: 120px;           /* Минимальная ширина для правильного отображения */
     padding: 0 15px;            /* Отступы слева/справа */
@@ -539,7 +541,7 @@ header{
 
   .top-categories-section {
     background-color: #f9f9f9;
-    padding: 60px 0;
+    padding: 40px 0 !important;
   }
   
   .top-categories-title {
@@ -595,7 +597,7 @@ header{
     width: 100%;
     height: 160px;
     object-fit: contain;
-    margin-bottom: 15px;
+    margin-bottom: 0;
   }
   
   .top-categories-product-title {
@@ -639,6 +641,7 @@ header{
     justify-content: center;
     width: 100%;
     transition: opacity 0.3s ease;
+    text-decoration: none;
   }
   
   .top-categories-btn:hover {
@@ -739,6 +742,31 @@ header{
   transition: all 0.3s ease;
 }
 
+.auth-link {
+  color: #3d3d3d;
+    text-decoration: none;
+    font-size: 16px !important;
+    transition: color 0.3s ease;
+}
+
+.profile-avatar1 {
+    height: 150px;
+    width: auto !important;
+    border-radius: 50%;
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none !important;
+}
+
+
+.form-link {
+  color: #3d3d3d;
+  text-decoration: none;
+  font-size: 16px !important;
+  transition: color 0.3s ease;
+}
 
 .product-badge {
   position: absolute;
@@ -795,6 +823,16 @@ header{
   width: fit-content;
   z-index: 1000;
   text-decoration: none;
+  cursor: pointer; /* добавлено для лучшей семантики */
+  transition: background-color 0.3s ease; /* плавный переход */
+}
+
+.product-detail-btn:hover {
+  background-color: #2b2b2b; /* серый цвет */
+}
+
+.product-detail-btn2:hover {
+  background-color: #2b2b2b; /* серый цвет */
 }
 
 .product-detail-btn2 {
@@ -826,27 +864,21 @@ header{
   }
 }
 
-@media (max-width: 756px) {
+@media (max-width: 766px) {
   .product-image1 {
-      max-height: 500px;
-      margin-right: 80px;
-      margin-top: 80px;
+    display: none;
   }
 }
 
 @media (max-width: 526px) {
   .product-image1 {
-      max-height: 300px;
-      margin-right: 170px;
-      margin-top: 80px;
+    display: none;
   }
 }
 
 @media (max-width: 400px) {
   .product-image1 {
-      max-height: 300px;
-      margin-right: 90px;
-      margin-top: 80px;
+    display: none;
   }
 }
 
@@ -949,7 +981,7 @@ header{
   width: 100%;
   height: 160px;
   object-fit: contain;
-  margin-bottom: 15px;
+  margin-bottom: 0;
 }
 
 .top-categories-product-title {
@@ -1649,19 +1681,55 @@ header{
 }
 
 .product__image-container {
-    background: white;
-    border-radius: 12px;
-    padding: 30px;
+    max-width: 100%;
+    max-height: 300px !important; /* Ограничиваем максимальную высоту */
     display: flex;
-    justify-content: center;
     align-items: center;
-    margin-bottom: 30px;
+    justify-content: center;
+    background-color: #f8f9fa; /* Светлый фон для контейнера */
+    object-fit: contain;
+    border-radius: 8px;
 }
 
-.product__image {
-    max-height: 400px;
-    max-width: 100%;
-    object-fit: contain;
+.placeholder-image {
+    width: 100%;
+    height: 400px;
+    background-color: #e9ecef;
+    border-radius: 8px;
+}
+
+/* Стили для галереи изображений на странице продукта */
+.product-gallery {
+    display: flex;
+    flex-direction: column; /* Основное изображение сверху, миниатюры снизу */
+}
+
+.main-image-display {
+    padding: 10px;
+    margin-bottom: 1rem;
+    /* product__image-container стили применяются здесь */
+}
+
+.thumbnail-images {
+    /* Bootstrap классы d-flex flex-wrap gap-2 уже задают основной layout */
+}
+
+.thumbnail-image {
+    width: 80px; /* Увеличил размер миниатюр для лучшей видимости */
+    height: 80px; /* Увеличил размер миниатюр для лучшей видимости */
+    object-fit: contain; /* Изменил на contain, чтобы изображение целиком вписывалось без обрезки */
+    border: 2px solid #eee;
+    border-radius: 5px; /* Немного скруглил углы миниатюр */
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    background-color: #fff; /* Добавил белый фон для миниатюр */
+    display: flex; /* Используем flexbox для центрирования изображения внутри миниатюры */
+    align-items: center;
+    justify-content: center;
+}
+
+.thumbnail-image:hover, .thumbnail-image.active {
+    border-color: #000;
 }
 
 .product__main-info {
@@ -1760,6 +1828,48 @@ header{
     border-bottom: none;
 }
 
+/* Стили для вкладок Описание/Характеристики */
+.nav-tabs {
+    border-bottom: 1px solid #dee2e6; /* Цвет нижней границы вкладок */
+}
+
+.nav-tabs .nav-item {
+    margin-bottom: -1px; /* Чтобы нижняя граница nav-link перекрывала nav-tabs */
+}
+
+.nav-tabs .nav-link {
+    border: 1px solid transparent; /* Прозрачная граница по умолчанию */
+    border-top-left-radius: 0.25rem; /* Закругление верхних углов */
+    border-top-right-radius: 0.25rem;
+    padding: 0.5rem 1rem;
+    color: #666; /* Цвет текста неактивной вкладки */
+    transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+    font-size: 1rem;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: #e9ecef #e9ecef #dee2e6;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+.nav-tabs .nav-link.active {
+    color: #000; /* Цвет текста активной вкладки */
+    background-color: #fff; /* Белый фон активной вкладки */
+    border-color: #dee2e6 #dee2e6 #fff; /* Границы активной вкладки (нижняя белая, чтобы не сливалась с контентом) */
+    font-weight: 600;
+}
+
+/* Стили для панели контента вкладок */
+.tab-content {
+    border: 1px solid #dee2e6;
+    border-top-color: transparent; /* Убираем верхнюю границу, так как ее перекрывает активная вкладка */
+    border-bottom-left-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
+    background-color: #fff;
+    padding: 1.5rem;
+}
+
 /* Стили для тостов */
 .toast {
     position: fixed;
@@ -1806,6 +1916,626 @@ header{
 
     .product__characteristic td:first-child {
         width: 150px;
+    }
+}
+
+/* Стили для страницы редактирования профиля */
+.profile-edit-container {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 2rem 0;
+}
+
+.profile-form-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 3px 3px -1px rgba(0,0,0,0.1);
+}
+
+.form-title {
+    font-family: 'Roboto', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #02111b;
+}
+
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-label {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    color: #3d3d3d;
+}
+
+.form-input {
+    padding: 0.75rem 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    border-color: #000;
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(0,0,0,0.1);
+}
+
+.avatar-upload {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.avatar-preview {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+
+.avatar-preview:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.avatar-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-edit {
+    flex: 1;
+    display: flex;
+    justify-content: center; /* по горизонтали */
+    align-items: center;       /* по вертикали */
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.avatar-edit input[type="file"] {
+    display: none;
+}
+
+.avatar-preview i {
+  font-size: 48px; /* Размер иконки */
+  color: #333;     /* Цвет иконки */
+}
+
+.avatar-edit label {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    min-width: 350px;
+    background: #000;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    font-family: 'Roboto', sans-serif;
+    font-size: 0.875rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: center; /* по горизонтали */
+    align-items: center;       /* по вертикали */
+}
+
+.avatar-edit label:hover {
+    background: #333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.avatar-edit .form-text {
+    color: #666;
+    font-size: 0.75rem;
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+.form-error {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.form-actions {
+    margin-top: 1rem;
+}
+
+.btn-primary {
+    background: #000;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-primary:hover {
+    background: #333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.danger-zone {
+    border: 1px solid #ffebee;
+    background: #fff5f5;
+    border-radius: 15px;
+}
+
+.danger-text {
+    color: #666;
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-danger:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.profile-avatar1 {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+
+.profile-avatar1:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.profile-avatar i {
+    font-size: 5rem;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .profile-form-card {
+        padding: 1.5rem;
+    }
+
+    .avatar-upload {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .avatar-edit {
+        width: 100%;
+    }
+    
+    .profile-avatar1,
+    .avatar-preview {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+/* Стили для автодополнения поиска */
+.autocomplete-results {
+    position: absolute;
+    background: #fff;
+    border: 1px solid #ddd;
+    width: calc(100% - 2px); /* Ширина равна полю ввода */
+    z-index: 1000;
+    max-height: 300px; /* Увеличим максимальную высоту */
+    overflow-y: auto;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); /* Более выраженная тень */
+    border-radius: 0 0 8px 8px; /* Скругление нижних углов */
+    top: 100%; /* Располагаем под полем ввода */
+    left: 1px; /* Выравниваем по левому краю поля ввода */
+    right: 1px;
+}
+
+.autocomplete-item {
+    display: flex; /* Используем flexbox для горизонтального расположения */
+    align-items: center; /* Выравнивание по центру по вертикали */
+    padding: 10px 15px; /* Внутренние отступы */
+    cursor: pointer;
+    color: #333;
+    text-decoration: none;
+    border-bottom: 1px solid #eee; /* Разделитель между элементами */
+    transition: background-color 0.2s ease;
+    gap: 15px; /* Отступ между изображением и текстом */
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none; /* Убираем нижнюю границу у последнего элемента */
+}
+
+.autocomplete-item:hover {
+    background: #f5f5f5; /* Цвет фона при наведении */
+}
+
+.autocomplete-item__image-container {
+    flex-shrink: 0; /* Запрещаем сжиматься */
+    width: 50px; /* Ширина контейнера изображения */
+    height: 50px; /* Высота контейнера изображения */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff; /* Белый фон */
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+
+.autocomplete-item__image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Изображение целиком вписывается */
+}
+
+.autocomplete-item__no-image {
+    font-size: 24px; /* Размер иконки-заглушки */
+    color: #999; /* Цвет иконки-заглушки */
+}
+
+.autocomplete-item__text-content {
+    flex-grow: 1; /* Позволяем блоку с текстом занимать всё доступное пространство */
+    overflow: hidden; /* Обрезаем текст, который не помещается */
+}
+
+.autocomplete-item__title {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500; /* Полужирный */
+    font-size: 1rem; /* 16px */
+    color: #02111b;
+    margin-bottom: 4px;
+    white-space: nowrap; /* Предотвращаем перенос строки */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Добавляем многоточие */
+}
+
+.autocomplete-item__description {
+    font-family: 'Roboto', sans-serif;
+    font-size: 0.875rem; /* 14px */
+    color: #666;
+    line-height: 1.4;
+    white-space: nowrap; /* Предотвращаем перенос строки */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Добавляем многоточие */
+}
+
+.autocomplete-item b {
+    font-weight: 700; /* Жирное выделение совпадений */
+    color: #000; /* Черный цвет выделения */
+}
+
+/* !ADMIN PANEL STYLES */
+
+.admin-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.admin-nav li {
+    margin-bottom: 10px;
+}
+
+.admin-nav a {
+    display: inline-block;
+    padding: 8px 15px;
+    background-color: #f8f9fa;
+    color: #000;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    border: 1px solid #dee2e6;
+}
+
+.admin-nav a:hover {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+}
+
+.admin-nav a:active, 
+.admin-nav a.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+/* Стили для админки */
+.admin-sidebar {
+    background-color: #000;
+    color: #fff;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.admin-sidebar h2 {
+    font-family: 'Yeseva One', serif;
+    font-size: 24px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.admin-sidebar li {
+    margin-bottom: 10px;
+}
+
+.admin-sidebar a {
+    color: #fff;
+    text-decoration: none;
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    padding: 10px 15px;
+    display: block;
+    border-radius: 5px;
+}
+
+.admin-sidebar a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+.admin-main {
+    margin-left: 250px;
+    padding: 20px;
+    background-color: #F9F9F9;
+    min-height: 100vh;
+}
+
+.admin-header {
+    background-color: #000;
+    color: #fff;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+.admin-header h2 {
+    font-family: 'Yeseva One', serif;
+    font-size: 24px;
+    margin: 0;
+}
+
+.admin-content {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 25px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.admin-table th, .admin-table td {
+    padding: 12px 15px;
+    border: 1px solid #eee;
+    text-align: left;
+}
+
+.admin-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #333;
+}
+
+.admin-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.admin-btn, .admin-btn:visited {
+    background: #000 !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    transition: all 0.3s ease;
+    display: inline-block;
+    outline: none;
+    cursor: pointer;
+}
+
+.admin-btn:hover, .admin-btn:focus {
+    background: #222 !important;
+    color: #fff !important;
+    text-decoration: none !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    transform: translateY(-1px);
+}
+
+.admin-btn:active {
+    background: #333 !important;
+    color: #fff !important;
+    transform: translateY(0);
+}
+
+.admin-btn.btn-sm {
+    font-size: 0.92rem;
+    padding: 8px 16px;
+}
+
+.admin-btn[disabled], .admin-btn.disabled {
+    background: #888 !important;
+    color: #fff !important;
+    opacity: 0.7;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.admin-btn-group {
+    display: flex;
+    gap: 10px;
+}
+
+.admin-btn-outline {
+
+}
+
+.admin-btn-outline:hover, .admin-btn-outline:focus {
+    background: #000 !important;
+    color: #fff !important;
+}
+
+.admin-btn-danger {
+    background: #dc3545 !important;
+    color: #fff !important;
+}
+
+.admin-btn-danger:hover, .admin-btn-danger:focus {
+    background: #c82333 !important;
+    color: #fff !important;
+}
+
+/* Формы в админке */
+.admin-form {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.admin-form .form-group {
+    margin-bottom: 20px;
+}
+
+.admin-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+.admin-form input[type="text"],
+.admin-form input[type="email"],
+.admin-form input[type="password"],
+.admin-form input[type="number"],
+.admin-form textarea,
+.admin-form select {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.admin-form input:focus,
+.admin-form textarea:focus,
+.admin-form select:focus {
+    border-color: #000;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.1);
+    outline: none;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .admin-sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 15px;
+    }
+    
+    .admin-main {
+        margin-left: 0;
+        padding: 15px;
+    }
+    
+    .admin-header {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
+    
+    .admin-table {
+        display: block;
+        overflow-x: auto;
+    }
+    
+    .admin-btn-group {
+        flex-direction: column;
+    }
+    
+    .admin-btn {
+        width: 100%;
+        text-align: center;
     }
 }
   

@@ -59,8 +59,42 @@ class ProfileController extends Controller
 
     public function edit(Request $request): View
     {
+        $goodOrders = [];
+        $orders = Order::with(['product'])
+            ->where('user_id', $request->user()->id)
+            ->get()
+            ->groupBy('number');
+
+        foreach ($orders as $orderGroup) {
+            $firstOrder = $orderGroup->first();
+            $totalPrice = 0;
+            $totalQty = 0;
+            $products = [];
+
+            foreach ($orderGroup as $orderItem) {
+                $totalPrice += $orderItem->product->price * $orderItem->quantity;
+                $totalQty += $orderItem->quantity;
+
+                $products[] = [
+                    'title' => $orderItem->product->title,
+                    'price' => $orderItem->product->price,
+                    'qty' => $orderItem->quantity,
+                ];
+            }
+
+            $goodOrders[] = [
+                'date' => $firstOrder->created_at,
+                'number' => $firstOrder->number,
+                'status' => $firstOrder->status,
+                'products' => $products,
+                'totalPrice' => $totalPrice,
+                'totalQty' => $totalQty,
+            ];
+        }
+
         return view('profile.edit', [
             'user' => $request->user(),
+            'orders' => $goodOrders
         ]);
     }
 
@@ -69,7 +103,16 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $data = $request->validated();
+        
+        if ($request->hasFile('avatar')) {
+            $avatar = $request->file('avatar');
+            $filename = time() . '.' . $avatar->getClientOriginalExtension();
+            $avatar->move(public_path('avatars'), $filename);
+            $data['avatar'] = 'avatars/' . $filename;
+        }
+
+        $request->user()->fill($data);
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;

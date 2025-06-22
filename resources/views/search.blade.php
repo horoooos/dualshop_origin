@@ -64,30 +64,64 @@
 @auth
 @push('scripts')
 <script>
-document.querySelectorAll('.favorite-toggle').forEach(button => {
-    button.addEventListener('click', function() {
-        const productId = this.dataset.productId;
-        fetch(`/favorites/${productId}/toggle`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            const icon = this.querySelector('i');
-            if (data.status === 'removed') {
-                icon.classList.remove('bi-heart-fill');
-                icon.classList.add('bi-heart');
-            } else {
-                icon.classList.remove('bi-heart');
-                icon.classList.add('bi-heart-fill');
-            }
-        });
-    });
+let timer;
+const searchInput = document.querySelector('input[name=\"query\"]');
+const resultsBox = document.createElement('div');
+resultsBox.className = 'autocomplete-results';
+searchInput.parentNode.appendChild(resultsBox);
+
+searchInput.addEventListener('input', function() {
+    clearTimeout(timer);
+    const query = this.value.trim();
+    if (query.length < 2) {
+        resultsBox.innerHTML = '';
+        resultsBox.style.display = 'none';
+        return;
+    }
+    timer = setTimeout(() => {
+        fetch(`/catalog/search?query=${encodeURIComponent(query)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.length === 0) {
+                    resultsBox.innerHTML = '<div class=\"autocomplete-item\">Ничего не найдено</div>';
+                } else {
+                    resultsBox.innerHTML = data.map(item =>
+                        `<a href=\"/catalog/${item.id}\" class=\"autocomplete-item\">${item.title}</a>`
+                    ).join('');
+                }
+                resultsBox.style.display = 'block';
+            });
+    }, 300);
+});
+
+document.addEventListener('click', function(e) {
+    if (!resultsBox.contains(e.target) && e.target !== searchInput) {
+        resultsBox.style.display = 'none';
+    }
 });
 </script>
+<style>
+.autocomplete-results {
+    position: absolute;
+    background: #fff;
+    border: 1px solid #ddd;
+    width: 100%;
+    z-index: 1000;
+    max-height: 250px;
+    overflow-y: auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.autocomplete-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    color: #333;
+    text-decoration: none;
+    display: block;
+}
+.autocomplete-item:hover {
+    background: #f0f0f0;
+}
+</style>
 @endpush
 @endauth
 @endsection 

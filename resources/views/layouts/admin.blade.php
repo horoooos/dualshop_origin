@@ -8,12 +8,23 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
-    @include('layouts.admin-header')
-    
+    <div class="admin-sidebar">
+        <h2>DUALSHOP/ADMIN</h2>
+        <ul>
+            <li><a href="{{ route('admin.index') }}">Главная</a></li>
+            <li><a href="{{ route('admin.products') }}">Товары</a></li>
+            <li><a href="{{ route('admin.products.create') }}">Добавить товар</a></li>
+            <li><a href="{{ route('admin.categories') }}">Категории</a></li>
+            <li><a href="{{ route('admin.categories.create') }}">Добавить категорию</a></li>
+            <li><a href="{{ route('admin.orders') }}">Заказы</a></li>
+            <li><a href="{{ route('admin.news.create') }}">Добавить новость</a></li>
+            <li><a href="{{ route('admin.news') }}">Редактировать новости</a></li>
+        </ul>
+    </div>
     <main class="admin-main">
         @yield('content')
     </main>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    @stack('scripts')
 </body>
 </html> 

@@ -151,14 +151,16 @@ class OrderController extends Controller
         return redirect()->route('admin.orders')->with('success', 'Статус заказа успешно обновлен');
     }
 
-    public function deleteOrder($number)
+    // Метод для удаления заказа из админ-панели
+    public function deleteOrderAdmin($number)
     {
         $orders = Order::where('number', $number);
-        
+
         if (!$orders->exists()) {
             return abort(404, 'Заказ не найден');
         }
 
+        // Логика проверки статуса и возврата товаров на склад
         $firstOrder = $orders->first();
         if ($firstOrder->status !== 'Новый') {
             return back()->with('error', 'Можно удалять только новые заказы');
@@ -171,6 +173,64 @@ class OrderController extends Controller
 
         // Удаляем заказ
         $orders->delete();
+
+        return redirect()->route('admin.orders')->with('success', 'Заказ успешно удален из админки');
+    }
+
+    // Этот метод, возможно, больше не используется напрямую из админки, но оставлен для других маршрутов, если они есть.
+    // Если нет других маршрутов, использующих его, его можно удалить.
+    public function deleteOrder($number)
+    {
+        // Добавляем логирование перед поиском заказа
+        \Log::info('Attempting to delete order with number: ' . $number);
+
+        $ordersToDelete = Order::where('number', $number)->get(); // Получаем коллекцию моделей
+
+        if ($ordersToDelete->isEmpty()) {
+            \Log::warning('Order with number ' . $number . ' not found for deletion (after fetching).');
+            return abort(404, 'Заказ не найден');
+        }
+
+        $firstOrder = $ordersToDelete->first();
+        if ($firstOrder->status !== 'Новый') {
+            \Log::warning('Attempt to delete non-new order with number: ' . $number . ' Status: ' . $firstOrder->status);
+            return back()->with('error', 'Можно удалять только новые заказы');
+        }
+
+        // Добавляем логирование перед удалением
+        $countToDelete = $ordersToDelete->count();
+        \Log::info('Found ' . $countToDelete . ' items to delete for order number: ' . $number);
+
+        $deletedCount = 0;
+        DB::transaction(function () use ($ordersToDelete, &$deletedCount) {
+            foreach ($ordersToDelete as $order) {
+                // Возвращаем товары на склад для каждого элемента заказа
+                // Убедимся, что product relation загружен или получим его
+                 if ($order->relationLoaded('product')) {
+                    $order->product->increment('qty', $order->quantity);
+                } else {
+                     // Загружаем product relation, если он не был загружен
+                    $product = \App\Models\Product::find($order->product_id);
+                    if ($product) {
+                         $product->increment('qty', $order->quantity);
+                    } else {
+                         \Log::warning('Product not found for order item id: ' . $order->id);
+                    }
+                }
+
+
+                // Удаляем текущий элемент заказа
+                if ($order->delete()) {
+                    $deletedCount++;
+                } else {
+                     \Log::error('Failed to delete order item id: ' . $order->id);
+                }
+            }
+        });
+
+
+        // Добавляем логирование после удаления
+        \Log::info('Deleted ' . $deletedCount . ' items for order number: ' . $number);
 
         return redirect()->route('profile.index')->with('success', 'Заказ успешно удален');
     }

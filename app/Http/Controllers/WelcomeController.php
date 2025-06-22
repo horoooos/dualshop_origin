@@ -30,9 +30,12 @@ class WelcomeController extends Controller
             ->take(8)
             ->get();
 
-        // Получаем категории
-        $categories = Category::all();
+        // Получаем категории для секции "Популярные категории" и "Акции и скидки" (случайные)
+        $categories = Category::whereNull('parent_id')->inRandomOrder()->take(5)->get();
 
-        return view('welcome', compact('products', 'topCategoriesProducts', 'categories'));
+        // Получаем категории для секции "Сезонные товары" (по конкретным названиям)
+        $seasonalCategories = Category::whereIn('name', ['Корпуса', 'Системы охлаждения'])->get();
+
+        return view('welcome', compact('products', 'topCategoriesProducts', 'categories', 'seasonalCategories'));
     }
 }

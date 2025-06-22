@@ -129,7 +129,7 @@ header{
     align-items: center;        /* Вертикальное выравнивание */
     justify-content: center;    /* Горизонтальное выравнивание */
     background-color: black;
-    border-radius: 5%;
+    border-radius: 5px;
     height: 29px;               /* Замена max-height на фиксированную высоту */
     min-width: 120px;           /* Минимальная ширина для правильного отображения */
     padding: 0 15px;            /* Отступы слева/справа */

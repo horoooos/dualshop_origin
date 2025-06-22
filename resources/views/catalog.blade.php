@@ -1,266 +1,581 @@
 @extends('layouts.app')
 @section('content')
 
-    <section class="catalog container pt-4">
-        <div class="catalog_text">
-            <h3 class="about__title text-start">Сортировать по</h3>
-            <div class="catalog__sort">
-                <a href="{{ $params->has('filter') ? '?filter=' . $params['filter'] . '&' : '?' }}sort_by{{ $params->has('sort_by') == 'country' ? '_desc' : '' }}=country" class="catalog__sort-item {{ (request()->query('sort_by') == 'country' ? 'active' : request()->query('sort_by_desc') == 'country') ? 'active' : '' }}">Страна поставщика</a>
-                <a href="{{ $params->has('filter') ? '?filter=' . $params['filter'] . '&' : '?' }}sort_by{{ $params->has('sort_by') == 'title' ? '_desc' : '' }}=title" class="catalog__sort-item {{ (request()->query('sort_by') == 'title' ? 'active' : request()->query('sort_by_desc') == 'title') ? 'active' : '' }}">Название</a>
-                <a href="{{ $params->has('filter') ? '?filter=' . $params['filter'] . '&' : '?' }}sort_by{{ $params->has('sort_by') == 'price' ? '_desc' : '' }}=price" class="catalog__sort-item {{ (request()->query('sort_by') == 'price' ? 'active' : request()->query('sort_by_desc') == 'price') ? 'active' : '' }}">Цена</a>
-                <a href="/catalog" class="catalog__sort-item--default">Сбросить</a>
-            </div>
-        </div>
-        <div class="catalog__filter">
-            @foreach($categories as $category)
-                <a href="{{ $params->has('sort_by') ? '?sort_by=' . $params['sort_by'] . '&' : '?' }} filter={{ $category->id }}" class="catalog__filter-item {{ request()->query('filter') == $category->id ? 'active' : '' }}">{{ $category->product_type }}</a>
-            @endforeach
-        </div>
-        <div class="catalog__list">
-            @if(count($products) > 0)
-                @foreach($products as $product)
-                    <div class="catalog__item">
-                        <div class="product-image-container">
-                            <img src="{{ Vite::asset('resources/media/images/' . $product->img) }}" alt="{{ $product->title }}" class="product-imagee">
+    {{-- Стили noUiSlider --}}
+{{--    @push('head')--}}
+{{--        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nouislider/15.7.1/nouislider.min.css">--}} {{-- Удаляем этот push --}}
+{{--    @endpush--}}
+
+    {{-- Скрипты noUiSlider --}}
+    @push('scripts')
+{{--        <script src="https://cdnjs.cloudflare.com/ajax/libs/nouislider/15.7.1/nouislider.min.js"></script>--}}
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+{{--                console.log('[DEBUG] DOMContentLoaded fired.');--}}
+
+                var priceMinInput = document.getElementById('price_min');
+{{--                console.log('[DEBUG] priceMinInput element:', priceMinInput);--}}
+
+                var priceMaxInput = document.getElementById('price_max');
+{{--                console.log('[DEBUG] priceMaxInput element:', priceMaxInput);--}}
+
+                // Явно определяем переменные minPrice для JavaScript
+                var minPrice = {{ $minPrice ?? 0 }};
+                // Максимальное значение будет определено из $maxProductPrice с бэкенда.
+
+                // *** Определяем реальную максимальную цену для слайдера ***
+                 // Используем $maxProductPrice с бэкенда, если он установлен, не null, является числом и больше minPrice.
+                 // Иначе используем надежное максимальное значение по умолчанию (1000000).
+                var realMaxPriceForSlider;
+                var maxPriceDefault = 1000000; // Надежное максимальное значение по умолчанию для JS fallback
+
+                 @if(isset($maxProductPrice) && is_numeric($maxProductPrice) && $maxProductPrice !== null && $maxProductPrice > $minPrice)
+                     realMaxPriceForSlider = parseFloat({{ $maxProductPrice }});
+                     console.log('[DEBUG] Использую максимальную цену с бэкенда для слайдера:', realMaxPriceForSlider);
+                 @else
+                     realMaxPriceForSlider = maxPriceDefault; // Используем значение по умолчанию, если $maxProductPrice некорректен
+                      console.log('[DEBUG] $maxProductPrice не установлен, не является числом, null или не больше minPrice. Использую стандартное максимальное значение:', realMaxPriceForSlider);
+                 @endif
+
+                // Проверяем, есть ли примененные фильтры по цене в запросе
+                var requestPriceMin = parseFloat('{{ request('price_min', '') }}');
+                var requestPriceMax = parseFloat('{{ request('price_max', '') }}');
+
+                // Определяем начальные значения для слайдера, используя значения из запроса или min/realMax
+                var startMin = requestPriceMin || minPrice;
+                // Если requestPriceMax есть, используем его для начального положения ползунка "до".
+                // Иначе используем realMaxPriceForSlider как значение по умолчанию.
+                var startMax = requestPriceMax || realMaxPriceForSlider;
+
+                // Корректируем начальные значения, убедившись, что они в пределах реального диапазона (minPrice - realMaxPriceForSlider)
+                if (startMin < minPrice) startMin = minPrice;
+                if (startMin > realMaxPriceForSlider) startMin = realMaxPriceForSlider;
+                if (startMax < minPrice) startMax = minPrice;
+                if (startMax > realMaxPriceForSlider) startMax = realMaxPriceForSlider;
+
+                // Добавляем проверку на существование необходимых элементов
+                // Теперь проверяем скрытый input для слайдера
+                var priceRangeSlider = $('#price_range_slider'); // Ion.RangeSlider использует jQuery
+
+                if (priceRangeSlider.length && priceMinInput && priceMaxInput && realMaxPriceForSlider > minPrice) {
+
+                    // Функция для обновления плейсхолдеров
+                    function updatePlaceholders() {
+                        if (priceMinInput.value === '') {
+                            priceMinInput.placeholder = minPrice;
+                        }
+                        if (priceMaxInput.value === '') {
+                            priceMaxInput.placeholder = realMaxPriceForSlider;
+                        }
+                    }
+
+                    // *** Инициализация Ion.RangeSlider ***
+                     console.log('[DEBUG] Инициализация Ion.RangeSlider с параметрами:', {
+                        min: minPrice,
+                        max: realMaxPriceForSlider,
+                        from: startMin,
+                        to: startMax
+                     });
+
+                     priceRangeSlider.ionRangeSlider({
+                        type: 'double', // Диапазонный слайдер
+                        min: minPrice,
+                        max: realMaxPriceForSlider, // Используем реальную максимальную цену для слайдера
+                        from: startMin, // Начальное значение ОТ
+                        to: startMax,   // Начальное значение ДО
+                        step: 1,
+                        prettify_enabled: true,
+                        prettify_separator: ' ', // Разделитель тысяч
+                        postfix: ' ₽', // Суффикс валюты
+                        hide_min_max: true, // Скрываем подписи min/max под слайдером
+                        hide_from_to: false, // Показываем текущие значения над слайдером
+                        grid: false, // Отключаем сетку
+                        onChange: function (data) {
+                            // Обновляем поля ввода при движении ползунка
+                            priceMinInput.value = data.from;
+                            priceMaxInput.value = data.to;
+                            // Убираем плейсхолдеры при обновлении полей
+                            priceMinInput.placeholder = '';
+                            priceMaxInput.placeholder = '';
+                        },
+                    });
+
+                    // Получаем экземпляр слайдера для синхронизации
+                    var sliderInstance = priceRangeSlider.data('ionRangeSlider');
+
+                    // Синхронизация полей ввода со слайдером (для ручного ввода)
+                    priceMinInput.addEventListener('input', function() {
+                        var value = parseFloat(this.value);
+                        if (!isNaN(value)) {
+                            sliderInstance.update({ from: value });
+                            this.placeholder = ''; // Убираем плейсхолдер при вводе
+                        } else if (this.value === '') {
+                            updatePlaceholders(); // Возвращаем плейсхолдер если поле очищено
+                        }
+                    });
+
+                    priceMaxInput.addEventListener('input', function() {
+                        var value = parseFloat(this.value);
+                        if (!isNaN(value)) {
+                            sliderInstance.update({ to: value });
+                            this.placeholder = ''; // Убираем плейсхолдер при вводе
+                        } else if (this.value === '') {
+                            updatePlaceholders(); // Возвращаем плейсхолдер если поле очищено
+                        }
+                    });
+
+                    // Изначально устанавливаем плейсхолдеры при загрузке страницы
+                    updatePlaceholders();
+
+                } else {
+                     console.warn('[WARN] Инициализация Ion.RangeSlider пропущена.', 'Слайдер найден?', priceRangeSlider.length > 0, 'Input min найден?', !!priceMinInput, 'Input max найден?', !!priceMaxInput, 'Диапазон корректен (max > min)?', realMaxPriceForSlider > minPrice, 'Min:', minPrice, 'Max:', realMaxPriceForSlider);
+                 }
+
+                 // Кнопка сброса фильтров
+                 var resetButton = document.getElementById('reset-filters');
+                 if (resetButton) {
+{{--                     console.log('[DEBUG] Кнопка сброса фильтров найдена.', resetButton);--}}
+                     resetButton.addEventListener('click', function(e) {
+                         e.preventDefault();
+                         // Переходим на URL без параметров фильтрации
+                         var currentUrl = new URL(window.location.href);
+                         var baseUrl = currentUrl.origin + currentUrl.pathname;
+                         // Оставляем только параметр категории, если он есть
+                         var categoryParam = currentUrl.searchParams.get('category');
+                         if (categoryParam) {
+                              window.location.href = baseUrl + '?category=' + categoryParam;
+                         } else {
+                              window.location.href = baseUrl;
+                         }
+                     });
+                 }
+            });
+        </script>
+    @endpush
+
+    <section class="catalog container pt-4 pb-5">
+        <div class="row">
+            <!-- Левая боковая панель с фильтрами -->
+            <div class="col-lg-3 mb-4">
+                <div class="border rounded bg-white p-3 mb-4 catalog-filter-panel">
+                    <h5 class="mb-3">Фильтры</h5>
+                    @if(isset($currentCategory) && $currentCategory)
+                        <div class="current-category mb-3">
+                            <span class="badge bg-dark">{{ $currentCategory->name }}</span>
+                        </div>
+                    @endif
+                    <form method="GET" action="{{ route('catalog') }}">
+                        @if(isset($currentCategory) && $currentCategory)
+                            <input type="hidden" name="category" value="{{ $currentCategory->id }}">
+                        @endif
+                        
+                        <!-- Фильтрация по цене -->
+                        <div class="filter-block mb-3">
+                            <h6 class="filter-title">Цена</h6>
+                            <div class="row align-items-center mb-2">
+                                <div class="col-5">
+                                    <div class="mb-2">
+                                        {{-- Поля ввода остаются, слайдер будет обновлять их --}}
+                                        <input type="number" class="form-control form-control-sm" id="price_min" name="price_min" 
+                                            value="{{ request('price_min') }}" min="0">
+                                    </div>
+                                </div>
+                                <div class="col-2 text-center">—</div> {{-- Дефис между полями --}}
+                                <div class="col-5">
+                                    <div class="mb-2">
+                                        <input type="number" class="form-control form-control-sm" id="price_max" name="price_max" 
+                                            value="{{ request('price_max') }}" min="0">
+                                    </div>
+                                </div>
+                            </div>
+                            {{-- Контейнер для слайдера цены --}}
+{{--                            <div id="price-slider" class="mt-3 mb-3" style="height: 20px;"></div>--}} {{-- Удаляем div контейнер --}}
+
+                            {{-- Добавляем скрытый input для Ion.RangeSlider --}}
+                            <input type="text" id="price_range_slider" class="price-range-slider" value="" />
+
                         </div>
                         
-                        <div class="product-info">
-                            <a href="/product/{{ $product->id }}" class="product-titlee">
-                                {{ $product->title }}
-                            </a>
-                            <div class="product__description">
-                                <h4>Описание:</h4>
-                                <p>{{ $product->description ?? 'Описание отсутствует' }}</p>
-                            </div>
-                        </div>
+                        <!-- Фильтрация по характеристикам -->
+                        @if(isset($filters) && is_array($filters) && count($filters) > 0)
+                            <div class="accordion accordion-flush" id="filterAccordion">
+                                @foreach($filters as $group => $groupFilters)
+                                    @php
+                                        // Проверяем, есть ли в этой группе фильтров хотя бы один фильтр с непустыми значениями (кроме model)
+                                        $hasVisibleFilters = false;
+                                        $isGroupActive = false; // Флаг для определения, активна ли группа (есть ли примененные фильтры в ней)
+                                        foreach ($groupFilters as $key => $filter) {
+                                            if ($key !== 'model' && !empty($filter['values'])) {
+                                                $hasVisibleFilters = true;
 
-                        <div class="product-price-block">
-                            <div class="product-price">
-                                {{ number_format($product->price, 0, ',', ' ') }} ₽
+                                                // Проверяем, применен ли какой-либо фильтр из этой группы
+                                                if (isset($appliedFilters[$key]) && !empty($appliedFilters[$key])) {
+                                                    $isGroupActive = true;
+                                                }
+                                            }
+                                        }
+                                    @endphp
+                                    @if ($hasVisibleFilters)
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header" id="heading-{{ Str::slug($group) }}">
+                                                {{-- Динамически добавляем/убираем класс collapsed --}}
+                                                <button class="accordion-button p-2 {{ $isGroupActive ? '' : 'collapsed' }}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ Str::slug($group) }}" aria-expanded="{{ $isGroupActive ? 'true' : 'false' }}" aria-controls="collapse-{{ Str::slug($group) }}">
+                                                    {{ $group }}
+                                                </button>
+                                            </h2>
+                                            {{-- Убираем data-bs-parent, чтобы аккордеоны не схлопывались --}}
+                                            {{-- Динамически добавляем класс show --}}
+                                            <div id="collapse-{{ Str::slug($group) }}" class="accordion-collapse collapse {{ $isGroupActive ? 'show' : '' }}" aria-labelledby="heading-{{ Str::slug($group) }}">
+                                                <div class="accordion-body p-2">
+                                                    @foreach($groupFilters as $key => $filter)
+                                                        @if($key !== 'model')
+                                                            @if (!empty($filter['values']))
+                                                                <div class="mb-2">
+                                                                    <div class="fw-bold small mb-1">{{ $filter['name'] }}</div>
+                                                                    @foreach($filter['values'] as $value)
+                                                                        @php
+                                                                            $isChecked = false;
+                                                                            $requestFilters = request()->query('filter', []);
+                                                                            if (isset($requestFilters[$key])) {
+                                                                                $valueToCompare = strtolower(trim((string)$value));
+                                                                                if (!is_array($requestFilters[$key])) {
+                                                                                    $isChecked = (strtolower(trim((string)$requestFilters[$key])) === $valueToCompare);
+                                                                                } else {
+                                                                                    foreach ($requestFilters[$key] as $requestedValue) {
+                                                                                        $requestedValueCompare = strtolower(trim((string)$requestedValue));
+                                                                                        // Учитываем нормализацию для материалов при сравнении
+                                                                                         if ($key === 'material') {
+                                                                                            $normalizedValue = strtolower(str_replace([' ,', ', '], ',', trim((string)$value)));
+                                                                                            $normalizedRequestedValue = strtolower(str_replace([' ,', ', '], ',', trim((string)$requestedValue)));
+                                                                                            if ($normalizedRequestedValue === $normalizedValue) {
+                                                                                                $isChecked = true;
+                                                                                                break;
+                                                                                            }
+                                                                                         } else {
+                                                                                            if ($requestedValueCompare === $valueToCompare || ($requestedValueCompare === '' && in_array($valueToCompare, ['ddr4', 'ddr5', 'atx', 'micro-atx', 'mini-itx', 'intel', 'amd']))) {
+                                                                                                $isChecked = true;
+                                                                                                break;
+                                                                                            }
+                                                                                         }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        @endphp
+                                                                        <div class="form-check filter-value-item" data-value="{{ strtolower(trim((string)$value)) }}">
+                                                                            <input class="form-check-input" type="checkbox" name="filter[{{ $key }}][]"
+                                                                                   value="{{ ($key === 'brand' && $value === 'ARDOR') ? 'ARDOR GAMING' : $value }}"
+                                                                                   id="{{ $key }}_{{ $value }}" {{ $isChecked ? 'checked' : '' }}>
+                                                                            <label class="form-check-label" for="{{ $key }}_{{ $value }}">{{ $value }}</label>
+                                                                        </div>
+                                                                    @endforeach
+                                                                </div>
+                                                            @endif
+                                                        @endif
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endforeach
                             </div>
-                            <div class="product-credit">
-                                от {{ number_format($product->price / 12, 0, ',', ' ') }} ₽/мес
-                            </div>
-                            @auth
-                            <div class="product-actions d-flex gap-2">
-                                <button onclick="addToCart({{ $product->id }})" class="btn btn-dark">
-                                    <i class="bi bi-cart-plus"></i> В корзину
-                                </button>
-                                <button onclick="toggleFavorite({{ $product->id }})" class="btn btn-outline-danger favorite-toggle" data-product-id="{{ $product->id }}">
-                                    <i class="bi bi-heart{{ auth()->user()->favorites->contains($product->id) ? '-fill' : '' }}"></i>
-                                </button>
-                            </div>
-                            @endauth
-                        </div>
-                    </div>
-                @endforeach
-            @else
-                <div class="col-12">
-                    <h3 class="text-center">Ничего не найдено</h3>
+                        @endif
+
+                        {{-- Кнопки Применить и Сбросить --}}
+                        <button class="btn-banner text-white w-100 mt-3" type="submit">Применить</button>
+                        @if(!empty(request()->query())) {{-- Показываем кнопку сброса только если есть активные фильтры --}}
+                            {{-- Ссылка для сброса фильтров. Переходит на URL текущей категории без параметров фильтра --}}
+                            <a href="@if(isset($currentCategory) && $currentCategory){{ route('catalog.category', $currentCategory->id) }}@else{{ route('catalog') }}@endif" 
+                               id="reset-filters" class="btn btn-link text-muted text-decoration-none w-100 mt-2 p-0">Сбросить фильтр</a>
+                        @endif
+                    </form>
                 </div>
-            @endif
+            </div>
+
+            <!-- Основная часть каталога -->
+            <div class="col-lg-9">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    @if(isset($searchResults) && $searchResults)
+                        <h1 class="catalog-title">Результаты поиска ({{ $searchQuery }}): {{ $products->total() }}</h1>
+                    @else
+                        <h1 class="catalog-title">{{ $pageTitle ?? 'Каталог товаров' }}</h1>
+                    @endif
+                    <div class="catalog__sort">
+                        <a href="{{ request()->fullUrlWithQuery(['sort' => 'price_asc']) }}" class="catalog__sort-item{{ request('sort') == 'price_asc' ? ' active' : '' }}">Цена <i class="bi bi-arrow-up"></i></a>
+                        <a href="{{ request()->fullUrlWithQuery(['sort' => 'price_desc']) }}" class="catalog__sort-item{{ request('sort') == 'price_desc' ? ' active' : '' }}">Цена <i class="bi bi-arrow-down"></i></a>
+                        <a href="{{ request()->fullUrlWithQuery(['sort' => 'title_asc']) }}" class="catalog__sort-item{{ request('sort') == 'title_asc' ? ' active' : '' }}">Название</a>
+                        <a href="{{ request()->fullUrlWithQuery(['sort' => 'country_asc']) }}" class="catalog__sort-item{{ request('sort') == 'country_asc' ? ' active' : '' }}">Страна</a>
+                         {{-- Сброс сортировки --}}
+                         @if(request('sort'))
+                             <a href="@if(isset($currentCategory) && $currentCategory){{ route('catalog.category', array_merge(['category' => $currentCategory->id], request()->except(['id', 'sort', 'page']))) }}@else{{ route('catalog', request()->except(['sort', 'page'])) }}@endif" class="catalog__sort-item catalog__sort-item--default">Сбросить сортировку</a>
+                         @endif
+                    </div>
+                </div>
+                <div class="row g-4">
+                    @forelse($products as $product)
+                        <div class="col-md-6 col-lg-4">
+                            @include('catalog._product_card', ['product' => $product])
+                        </div>
+                    @empty
+                        <div class="col-12">
+                            <div class="alert alert-info">Товары не найдены.</div>
+                        </div>
+                    @endforelse
+                </div>
+                <div class="mt-4">
+                    {{-- Удаленная пагинация --}}
+                    {{-- {{ $products->appends(request()->except('page'))->links() }} --}}
+                </div>
+            </div>
         </div>
     </section>
 
-    @auth
-    <div class="position-fixed" style="top: 20px; right: 20px; z-index: 9999;">
-        <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header bg-success text-white">
-                <i class="bi bi-check-circle me-2"></i>
-                <strong class="me-auto">Успешно</strong>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body bg-success text-white">
-                Товар добавлен в корзину
-            </div>
-        </div>
-        
-        <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header bg-danger text-white">
-                <i class="bi bi-exclamation-circle me-2"></i>
-                <strong class="me-auto">Ошибка</strong>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-            <div class="toast-body bg-danger text-white">
-                Товара нет в наличии
-            </div>
-        </div>
-    </div>
-
-    <script>
-    function addToCart(productId) {
-        if(!productId) return;
-        
-        fetch(`/add-to-cart/${productId}`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            const toast = new bootstrap.Toast(
-                document.getElementById(data.status === 'success' ? 'successToast' : 'errorToast')
-            );
-            
-            if (data.status === 'success') {
-                document.querySelector('#successToast .toast-body').textContent = data.message;
-                // Обновляем количество товаров в корзине в шапке
-                const cartCount = document.querySelector('.cart-count');
-                if (cartCount) {
-                    cartCount.textContent = parseInt(cartCount.textContent || 0) + 1;
-                }
-            } else {
-                document.querySelector('#errorToast .toast-body').textContent = data.message;
-            }
-            
-            toast.show();
-        })
-        .catch(error => {
-            const toast = new bootstrap.Toast(document.getElementById('errorToast'));
-            document.querySelector('#errorToast .toast-body').textContent = 'Произошла ошибка при добавлении товара';
-            toast.show();
-        });
-    }
-
-    function toggleFavorite(productId) {
-        if(!productId) return;
-        
-        fetch(`/favorites/${productId}/toggle`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            const button = document.querySelector(`.favorite-toggle[data-product-id="${productId}"] i`);
-            if (data.status === 'added') {
-                button.classList.remove('bi-heart');
-                button.classList.add('bi-heart-fill');
-            } else {
-                button.classList.remove('bi-heart-fill');
-                button.classList.add('bi-heart');
-            }
-        })
-        .catch(error => {
-            const toast = new bootstrap.Toast(document.getElementById('errorToast'));
-            document.querySelector('#errorToast .toast-body').textContent = 'Произошла ошибка при обновлении избранного';
-            toast.show();
-        });
-    }
-    </script>
-
     <style>
-    .product-actions {
-        margin-top: 1rem;
-    }
-
-    .btn-dark {
-        background-color: #000;
-        border-color: #000;
-        color: #fff;
-        padding: 0.5rem 1rem;
+    .filter-title {
+        font-weight: 600;
+        margin-bottom: 0.75rem;
         font-size: 0.9rem;
-        transition: all 0.3s ease;
     }
-
-    .btn-dark:hover {
-        background-color: #333;
-        border-color: #333;
+    .filter-block {
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #eee;
     }
-
-    .btn-outline-danger {
-        border-color: #dc3545;
-        color: #dc3545;
-        padding: 0.5rem 0.75rem;
-        transition: all 0.3s ease;
-    }
-
-    .btn-outline-danger:hover {
-        background-color: #dc3545;
-        color: #fff;
-    }
-
-    .favorite-toggle {
-        min-width: 42px;
-    }
-
-    .toast {
-        min-width: 300px;
-        background: transparent;
-        border: none;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        margin-bottom: 10px;
-    }
-
-    .toast-header {
+    .filter-block:last-child {
         border-bottom: none;
-        padding: 12px 15px;
-        border-radius: 8px 8px 0 0;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    @media (max-width: 991px) {
+        .product-image-container {
+            height: 350px;
+        }
+    }
+    @media (max-width: 767px) {
+        .product-image-container {
+            height: 300px;
+        }
+    }
+    /* Стилизация блока фильтров под дизайн сайта */
+    .catalog-filter-panel {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.04);
+        padding: 1.5rem 1.2rem 1.2rem 1.2rem;
+        margin-bottom: 2rem;
+        min-width: 250px;
+        max-width: 340px;
+    }
+    .catalog-filter-panel h4, .catalog-filter-panel .filter-group-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #222;
+    }
+    .catalog-filter-panel .filter-group-title {
+        margin-top: 1.2rem;
+        margin-bottom: 0.7rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #222;
+    }
+    .catalog-filter-panel label {
+        font-size: 1rem;
+        font-weight: 400;
+        color: #222;
+        margin-bottom: 0.3rem;
+        margin-left: 0.4rem;
+        cursor: pointer;
+    }
+    .catalog-filter-panel .form-check {
+        margin-bottom: 0.3rem;
+        display: flex;
+        align-items: center;
+    }
+    .catalog-filter-panel .form-check-input {
+        margin-right: 0.5rem;
+        accent-color: #000;
+        width: 1.1em;
+        height: 1.1em;
+        border-radius: 4px;
+    }
+    .catalog-filter-panel hr {
+        margin: 1.2rem 0 1rem 0;
+        border-top: 1px solid #eee;
+    }
+    .catalog-filter-panel .btn-apply {
+        width: 100%;
+        background: #000;
+        color: #fff;
+        border: none;
+        border-radius: 7px;
+        padding: 0.7rem 0;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-top: 1.2rem;
+        transition: background 0.2s;
+    }
+    .catalog-filter-panel .btn-apply:hover {
+        background: #222;
     }
 
-    .toast-body {
-        padding: 12px 15px;
-        border-radius: 0 0 8px 8px;
+    /* Стили для аккордеона фильтров */
+    .catalog-filter-panel .accordion-item {
+        border: none;
+        border-bottom: 1px solid #eee;
+    }
+    .catalog-filter-panel .accordion-item:last-child {
+        border-bottom: none;
+    }
+    .catalog-filter-panel .accordion-button {
+        background-color: transparent;
+        color: #222;
+        font-weight: 600;
+        padding: 0.75rem 0.5rem;
+        box-shadow: none;
+    }
+    .catalog-filter-panel .accordion-button:not(.collapsed) {
+        background-color: #f0f0f0; /* Серый фон при открытии */
+        color: #000;
+    }
+    .catalog-filter-panel .accordion-button:focus {
+        box-shadow: none;
+        border-color: transparent;
+    }
+     .catalog-filter-panel .accordion-body {
+        padding: 0.5rem;
+     }
+
+     /* Стили для noUiSlider */
+    .catalog-filter-panel .noUi-target {
+        background: #ddd; /* Цвет неактивной части */
+        border-radius: 4px;
+        border: none;
+        box-shadow: none;
+    }
+    .catalog-filter-panel .noUi-connects {
+         border-radius: 4px;
+    }
+    .catalog-filter-panel .noUi-connect {
+        background: #ff8c00; /* Оранжевый цвет для активной части */
+    }
+    .catalog-filter-panel .noUi-handle {
+        border-radius: 50%;
+        background: #ff8c00; /* Оранжевый фон ползунка */
+        border: 2px solid #ff8c00; /* Оранжевая обводка */
+        cursor: pointer;
+        box-shadow: none;
+        width: 18px; /* Размер ползунка */
+        height: 18px;
+        top: -6px; /* Корректировка положения */
+        right: -9px; /* Корректировка положения */
+    }
+     .catalog-filter-panel .noUi-handle::before,
+     .catalog-filter-panel .noUi-handle::after {
+         display: none; /* Убираем стандартные элементы */
+     }
+     .catalog-filter-panel .noUi-tooltip {
+         background: #ff8c00; /* Оранжевый фон подсказки */
+         color: #fff; /* Белый текст подсказки */
+         border-radius: 4px;
+         border: none;
+         padding: 4px 8px;
+         font-size: 0.8rem;
+         bottom: 140%; /* Положение над ползунком */
+         transform: translate(-50%, 0); /* Центрирование */
+     }
+     .catalog-filter-panel .noUi-horizontal .noUi-tooltip {
+          left: 50%;
+          margin-left: 0;
+     }
+
+    @media (max-width: 768px) {
+        .catalog-filter-panel {
+            max-width: 100%;
+            min-width: unset;
+            padding: 1rem 0.7rem;
+        }
     }
 
-    .btn-close {
-        opacity: 0.8;
-        padding: 12px;
+    /* Добавляем стили для полей ввода цены */
+    .catalog-filter-panel input[type="number"].form-control-sm {
+        padding: 0.25rem 0.5rem;
+        height: calc(1.5em + 0.5rem + 2px); /* Примерная высота Bootstrap sm input */
+        border-radius: 5px; /* Скругляем углы */
+        border: 1px solid #ced4da;
+        text-align: center; /* Центрируем текст */
+        font-size: 0.875rem;
     }
 
-    .btn-close:hover {
-        opacity: 1;
+    /* Стилизация Ion.RangeSlider */
+    .catalog-filter-panel .irs--flat .irs-bar {
+         background: #000; /* Черный цвет активной части */
+         height: 6px; /* Толщина полосы */
+         top: 25px; /* Положение полосы */
     }
-
-    /* Анимация появления */
-    .toast.showing {
-        opacity: 1 !important;
-        transform: translateX(0);
-        transition: all 0.3s ease;
+    .catalog-filter-panel .irs--flat .irs-line {
+        top: 25px; /* Положение полосы */
+        height: 6px; /* Толщина полосы */
+        background: #f0f0f0; /* Светло-серый цвет неактивной части */
+         border: none; /* Убираем границу */
     }
-
-    .toast.hide {
-        opacity: 0 !important;
-        transform: translateX(100%);
-        transition: all 0.3s ease;
+    .catalog-filter-panel .irs--flat .irs-handle {
+        top: 17px; /* Положение ползунка */
+        width: 22px; /* Размер ползунка */
+        height: 22px;
+        background: #fff; /* Белый фон ползунка */
+        border: 2px solid #000; /* Черная обводка */
+        box-shadow: 0px 1px 3px rgba(0,0,0,0.2); /* Тень */
+        cursor: pointer;
+        border-radius: 50%; /* Круглая форма */
+         /* Добавляем hover эффект */
+         transition: all 0.2s ease;
     }
+     .catalog-filter-panel .irs--flat .irs-handle:hover {
+         transform: scale(1.1);
+         box-shadow: 0px 2px 6px rgba(0,0,0,0.3);
+     }
+     .irs--flat .irs-handle>i:first-child {
+        position: absolute;
+        display: block;
+        top: 0;
+        left: 50%;
+        width: 2px;
+        height: 100%;
+        margin-left: -1px;
+        background-color: white !important;
+     }
 
-    /* Убираем паддинги у контейнера */
-    .position-fixed {
-        padding: 0;
+     /* Стилизация текста над ползунками */
+     .catalog-filter-panel .irs--flat .irs-from,
+     .catalog-filter-panel .irs--flat .irs-to,
+     .catalog-filter-panel .irs--flat .irs-single {
+         background: #000; /* Черный фон подсказки */
+         color: #fff; /* Белый текст подсказки */
+         padding: 4px 8px;
+         border-radius: 4px; /* Скругление углов */
+         font-size: 0.8rem;
+         font-weight: 600; /* Делаем текст жирнее */
+         margin-bottom: 20px;
+     }
+     .catalog-filter-panel .irs--flat .irs-from:before,
+     .catalog-filter-panel .irs--flat .irs-to:before,
+     .catalog-filter-panel .irs--flat .irs-single:before {
+         border-top-color: #000; /* Черный цвет стрелки, соответствует фону подсказки */
+     }
+      /* Стилизация min/max подписей (скрыты, но на всякий случай) */
+     .catalog-filter-panel .irs--flat .irs-min,
+     .catalog-filter-panel .irs--flat .irs-max {
+          display: none; /* Скрываем */
+          color: #666;
+          font-size: 0.8rem;
+     }
+
+    /* Styles for the catalog/search results title */
+    .catalog-title {
+        font-family: 'Roboto', sans-serif;
+        font-weight: 700;
+        font-size: 24px;
+        color: #02111b;
     }
-
-/* Стили для активных состояний кнопок */
-.btn-check:checked + .btn,
-.btn.active,
-.btn.show,
-.btn:first-child:active,
-:not(.btn-check) + .btn:active {
-    color: white !important; /* Белый текст для контраста */
-    background-color: black !important;
-    border-color: black !important;
-    box-shadow: 0 0 0 0.25rem rgba(0, 0, 0, 0.1) !important; /* Светлая тень */
-}
-
-/* Состояние hover для чёрных кнопок */
-.btn-dark:hover {
-    background-color: #333 !important; /* Тёмно-серый при наведении */
-    border-color: #333 !important;
-}
-
-/* Адаптация для светлой темы (если нужно) */
-@media (prefers-color-scheme: light) {
-    .btn-check:checked + .btn,
-    .btn.active {
-        color: white !important;
-        background-color: #212529 !important; /* Чуть светлее чёрного */
-    }
-}
     </style>
-    @endauth
 @endsection

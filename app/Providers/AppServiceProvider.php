@@ -21,6 +21,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
          Vite::macro('image', fn ($asset) => $this->asset("resources/images/{$asset}"));
+
+         // Автоматическое копирование картинок при запуске сайта
+         if ($this->app->runningInConsole() === false) {
+             \Artisan::call('images:copy-to-public');
+         }
     }
 
     private function asset(string $string)
