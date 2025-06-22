@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 /.phpunit.cache
 /node_modules
 /public/build
@@ -18,40 +16,24 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
-=======
-=======
->>>>>>> 73eff97950b7c15afe286f8161bbe0e3d14f8283
-/vendor/
-node_modules/
-npm-debug.log
-yarn-error.log
-
 # Laravel 4 specific
 bootstrap/compiled.php
 app/storage/
-
 # Laravel 5 & Lumen specific
 public/storage
 public/hot
-
 # Laravel 5 & Lumen specific with changed public path
 public_html/storage
 public_html/hot
-
 storage/*.key
 .env
 Homestead.yaml
 Homestead.json
 /.vagrant
 .phpunit.result.cache
-
 /public/build
 /storage/pail
 .env.backup
 .env.production
 .phpactor.json
-auth.json
-<<<<<<< HEAD
->>>>>>> 6db6931d1fcdf1ba42d2c0b32f6f79a6ef4af3a6
-=======
->>>>>>> 73eff97950b7c15afe286f8161bbe0e3d14f8283
+auth.json 
